@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      * { margin: 0; padding: 0; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        box-sizing: border-box;
+        background-color: #FFFFFF;
+        position: relative;
+        overflow: hidden;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        padding: 60px 80px;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 40px;
+      }
+      .accent-box {
+        width: 12px;
+        height: 50px;
+        background-color: #F4BA44;
+      }
+      .slide-title {
+        font-size: 44px;
+        font-weight: 800;
+        color: #531110;
+        letter-spacing: -1px;
+      }
+      .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        flex: 1;
+      }
+      .pain-points {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+      }
+      .pain-item {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+      }
+      .icon-circle {
+        width: 50px;
+        height: 50px;
+        background-color: #ae2e2a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 22px;
+        flex-shrink: 0;
+      }
+      .pain-content h3 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #531110;
+        margin-bottom: 5px;
+      }
+      .pain-content p {
+        font-size: 17px;
+        color: #666666;
+        line-height: 1.5;
+      }
+      .impact-metrics {
+        background-color: #F9FAFB;
+        padding: 30px;
+        border-top: 6px solid #531110;
+      }
+      .metric-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .metric-table th {
+        text-align: left;
+        font-size: 14px;
+        text-transform: uppercase;
+        color: #9CA3AF;
+        padding-bottom: 15px;
+        letter-spacing: 1px;
+      }
+      .metric-table td {
+        padding: 15px 0;
+        border-bottom: 1px solid #E5E7EB;
+      }
+      .metric-label {
+        font-size: 18px;
+        font-weight: 600;
+        color: #374151;
+      }
+      .metric-value {
+        font-size: 24px;
+        font-weight: 900;
+        color: #ae2e2a;
+        text-align: right;
+      }
+      .footer-line {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 10px;
+        background: linear-gradient(90deg, #531110 0%, #ae2e2a 100%);
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <div class="accent-box"></div>
+            <h2 class="slide-title">Cenário Atual e Desafios</h2>
+        </div>
+        
+        <div class="main-grid">
+            <div class="pain-points">
+                <div class="pain-item">
+                    <div class="icon-circle"><i class="fab fa-whatsapp"></i></div>
+                    <div class="pain-content">
+                        <h3>Reporte Informal</h3>
+                        <p>Uso de canais não oficiais (WhatsApp) gera perda de dados e falta de rastreabilidade jurídica.</p>
+                    </div>
+                </div>
+                <div class="pain-item">
+                    <div class="icon-circle"><i class="fas fa-clock"></i></div>
+                    <div class="pain-content">
+                        <h3>Gargalo Operacional</h3>
+                        <p>Dependência de interação humana no COP para suspensão de SAs, gerando ociosidade em campo.</p>
+                    </div>
+                </div>
+                <div class="pain-item">
+                    <div class="icon-circle"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="pain-content">
+                        <h3>Fragilidade na Auditoria</h3>
+                        <p>Ausência de evidências georreferenciadas e fotos padronizadas dificulta a contestação de quebras.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="impact-metrics">
+                <table class="metric-table">
+                    <thead>
+                        <tr>
+                            <th>Indicador de Impacto</th>
+                            <th style="text-align: right;">Perda Estimada</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="metric-label">Tempo de Espera (Técnico)</td>
+                            <td class="metric-value">+25 min / SA</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-label">Confiabilidade da Evidência</td>
+                            <td class="metric-value">Baixa</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-label">Produtividade da Agenda</td>
+                            <td class="metric-value">-15% dia</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-label">Custo de Retrabalho COP</td>
+                            <td class="metric-value">Elevado</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="footer-line"></div>
+    </div>
+</body>
+</html>

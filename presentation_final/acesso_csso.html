@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      * { margin: 0; padding: 0; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        box-sizing: border-box;
+        background-color: #FFFFFF;
+        position: relative;
+        overflow: hidden;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        padding: 60px 80px;
+      }
+      .header-accent {
+        width: 100px;
+        height: 8px;
+        background-color: #F4BA44;
+        margin-bottom: 20px;
+      }
+      .slide-title {
+        font-size: 44px;
+        font-weight: 800;
+        color: #531110;
+        margin-bottom: 40px;
+      }
+      .main-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 60px;
+        flex: 1;
+      }
+      .info-section {
+        display: flex;
+        flex-direction: column;
+        gap: 35px;
+      }
+      .info-block h3 {
+        font-size: 26px;
+        font-weight: 800;
+        color: #ae2e2a;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .info-block p {
+        font-size: 19px;
+        color: #4B5563;
+        line-height: 1.6;
+      }
+      .mockup-area {
+        background-color: #F3F4F6;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid #E5E7EB;
+      }
+      .login-card {
+        width: 300px;
+        background-color: #FFFFFF;
+        border: 2px solid #531110;
+        padding: 30px 20px;
+        text-align: center;
+      }
+      .login-logo {
+        width: 60px;
+        height: 60px;
+        background-color: #531110;
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #F4BA44;
+        font-size: 24px;
+      }
+      .input-mock {
+        width: 100%;
+        height: 40px;
+        border: 1px solid #D1D5DB;
+        margin-bottom: 15px;
+        background-color: #F9FAFB;
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
+        font-size: 14px;
+        color: #9CA3AF;
+      }
+      .btn-mock {
+        width: 100%;
+        height: 45px;
+        background-color: #ae2e2a;
+        color: #FFFFFF;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10px;
+      }
+      .footer-note {
+        position: absolute;
+        bottom: 40px;
+        left: 80px;
+        font-size: 14px;
+        color: #9CA3AF;
+        font-weight: 600;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header-accent"></div>
+        <h2 class="slide-title">Segurança e Governança: Padrão CSSO</h2>
+        
+        <div class="main-grid">
+            <div class="info-section">
+                <div class="info-block">
+                    <h3>Identificação Corporativa</h3>
+                    <p>Integração nativa com o <strong>CSSO Desktop</strong>. O técnico utiliza suas credenciais oficiais, eliminando o uso de matrículas genéricas ou acessos compartilhados.</p>
+                </div>
+                <div class="info-block">
+                    <h3>Rastreabilidade Total</h3>
+                    <p>Cada solicitação de quebra é vinculada ao usuário autenticado, gerando um log de auditoria inquestionável para o COP e para a diretoria.</p>
+                </div>
+                <div class="info-block">
+                    <h3>Conformidade de TI</h3>
+                    <p>Adoção de protocolos de segurança vigentes na companhia, garantindo que o aplicativo esteja alinhado às políticas de proteção de dados.</p>
+                </div>
+            </div>
+            
+            <div class="mockup-area">
+                <div class="login-card">
+                    <div class="login-logo"><i class="fas fa-user-shield"></i></div>
+                    <div style="font-size: 18px; font-weight: 800; color: #531110; margin-bottom: 20px;">ACESSO CSSO</div>
+                    <div class="input-mock">Usuário CSSO</div>
+                    <div class="input-mock">Senha</div>
+                    <div class="btn-mock">ENTRAR</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-note">AUTENTICAÇÃO CENTRALIZADA • SEGURANÇA DA INFORMAÇÃO</div>
+    </div>
+</body>
+</html>

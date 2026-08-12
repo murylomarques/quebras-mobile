@@ -1,0 +1,100 @@
+{
+  "project_info": {
+    "title": "DESKTOP Quebras",
+    "created": 1786557000.849,
+    "last_updated": 1786557138.553,
+    "total_slides": 8
+  },
+  "slides": [
+    {
+      "id": "capa_institucional",
+      "state": "edited",
+      "pageNum": 1
+    },
+    {
+      "id": "desafio_operacional",
+      "state": "edited",
+      "pageNum": 2
+    },
+    {
+      "id": "solucao_integrada",
+      "state": "edited",
+      "pageNum": 3
+    },
+    {
+      "id": "acesso_csso",
+      "state": "edited",
+      "pageNum": 4
+    },
+    {
+      "id": "gestao_sas",
+      "state": "edited",
+      "pageNum": 5
+    },
+    {
+      "id": "motivos_quebra",
+      "state": "edited",
+      "pageNum": 6
+    },
+    {
+      "id": "validacao_gps_camera",
+      "state": "edited",
+      "pageNum": 7
+    },
+    {
+      "id": "resultados_salesforce",
+      "state": "edited",
+      "pageNum": 8
+    }
+  ],
+  "outline": [
+    {
+      "id": "capa_institucional",
+      "title": "DESKTOP Quebras",
+      "summary": "Capa institucional com branding DESKTOP e título da solução operacional pronta.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "desafio_operacional",
+      "title": "O Cenário Atual e Desafios",
+      "summary": "Análise das dores do processo manual e impactos na produtividade.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "solucao_integrada",
+      "title": "A Solução: Mobilidade e Controle",
+      "summary": "Visão geral do aplicativo e seus pilares de governança e agilidade.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "acesso_csso",
+      "title": "Segurança e Governança (CSSO)",
+      "summary": "Autenticação corporativa padrão para total rastreabilidade.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "gestao_sas",
+      "title": "Gestão Inteligente de SAs",
+      "summary": "Automação da lista de ordens de serviço sem digitação manual.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "motivos_quebra",
+      "title": "Matriz de Quebras Autorizadas",
+      "summary": "Os 10 motivos prioritários com fluxos guiados no app.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "validacao_gps_camera",
+      "title": "Validação GPS e Câmera Guiada",
+      "summary": "Garantia de presença no local e qualidade da evidência coletada.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "resultados_salesforce",
+      "title": "Resultados e Integração Salesforce",
+      "summary": "Ganhos de eficiência e atualização automática de sistemas.",
+      "image_plan": "Use a suitable image if needed"
+    }
+  ]
+}

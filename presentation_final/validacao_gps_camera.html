@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      * { margin: 0; padding: 0; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        box-sizing: border-box;
+        background-color: #FFFFFF;
+        position: relative;
+        overflow: hidden;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        padding: 60px 80px 20px; /* keep top padding (60px) but reduce bottom to shrink total height */
+      }
+      .header-accent {
+        width: 100px;
+        height: 8px;
+        background-color: #F4BA44;
+        margin-bottom: 20px;
+      }
+      .slide-title {
+        font-size: 48px;
+        font-weight: 900;
+        color: #531110;
+        margin-bottom: 40px;
+      }
+      .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 30px; /* reduced gap to save space */
+        flex: 1;
+      }
+      .feature-list {
+        display: flex;
+        flex-direction: column;
+        gap: 18px; /* reduced gap */
+      }
+      .feature-item {
+        display: flex;
+        gap: 12px; /* reduced inner gap */
+        align-items: flex-start;
+      }
+      .icon-square {
+        width: 60px;
+        height: 60px;
+        background-color: #531110;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #F4BA44;
+        font-size: 28px;
+        flex-shrink: 0;
+      }
+      .feature-content h3 {
+        font-size: 24px;
+        font-weight: 800;
+        color: #531110;
+        margin-bottom: 10px;
+      }
+      .feature-content p {
+        font-size: 18px;
+        color: #4B5563;
+        line-height: 1.6;
+      }
+      .mockup-area {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .phone-frame {
+        width: 300px;
+        height: 420px; /* reduced height to remove overflow */
+        background-color: #111827;
+        border-radius: 40px;
+        padding: 8px; /* slightly less padding */
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      }
+      .phone-screen {
+        width: 100%;
+        height: 100%;
+        background-color: #000000;
+        border-radius: 30px;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      .camera-overlay {
+        width: 220px;
+        height: 220px; /* reduced overlay height */
+        border: 2px dashed #F4BA44;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #F4BA44;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 16px;
+      }
+      .gps-badge {
+        position: absolute;
+        top: 18px;
+        left: 18px;
+        background-color: #22C55E;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .shutter-button {
+        position: absolute;
+        bottom: 18px;
+        width: 50px;
+        height: 50px;
+        border-radius: 25px;
+        background-color: white;
+        border: 5px solid #ae2e2a;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header-accent"></div>
+        <h2 class="slide-title">Validação GPS e Câmera Guiada</h2>
+        
+        <div class="content-grid">
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="icon-square"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="feature-content">
+                        <h3>Cerca Eletrônica (GPS)</h3>
+                        <p>O aplicativo valida as coordenadas em tempo real. O registro da quebra só é habilitado se o técnico estiver dentro do raio de atendimento da SA.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon-square"><i class="fas fa-camera"></i></div>
+                    <div class="feature-content">
+                        <h3>Enquadramento Inteligente</h3>
+                        <p>Molduras dinâmicas orientam o técnico a capturar a evidência correta (fachada, placa ou equipamento), garantindo a qualidade da auditoria.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon-square"><i class="fas fa-check-double"></i></div>
+                    <div class="feature-content">
+                        <h3>Prova de Execução</h3>
+                        <p>Metadados de localização e timestamp são vinculados à imagem, tornando a evidência incontestável para o COP e para o Salesforce.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mockup-area">
+                <div class="phone-frame">
+                    <div class="phone-screen">
+                        <div class="gps-badge"><i class="fas fa-satellite"></i> GPS ATIVO</div>
+                        <div class="camera-overlay">
+                            ENQUADRE A FACHADA OU PLACA DO LOGRADOURO
+                        </div>
+                        <div class="shutter-button"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

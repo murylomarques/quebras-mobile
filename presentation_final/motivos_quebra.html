@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      * { margin: 0; padding: 0; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        box-sizing: border-box;
+        background-color: #FFFFFF;
+        position: relative;
+        overflow: hidden;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        padding: 60px 80px;
+      }
+      .header-accent {
+        width: 100px;
+        height: 8px;
+        background-color: #F4BA44;
+        margin-bottom: 20px;
+      }
+      .slide-title {
+        font-size: 44px;
+        font-weight: 900;
+        color: #531110;
+        margin-bottom: 40px;
+        letter-spacing: -1px;
+      }
+      .reasons-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px 30px;
+        flex: 1;
+      }
+      .reason-card {
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        background-color: #F9FAFB;
+        border-left: 6px solid #ae2e2a;
+      }
+      .reason-icon {
+        width: 40px;
+        font-size: 22px;
+        color: #531110;
+        text-align: center;
+        margin-right: 20px;
+      }
+      .reason-name {
+        font-size: 19px;
+        font-weight: 700;
+        color: #374151;
+      }
+      .footer-note {
+        margin-top: 30px;
+        padding: 20px;
+        background-color: #531110;
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+      .footer-note i {
+        color: #F4BA44;
+        font-size: 24px;
+      }
+      .footer-note p {
+        font-size: 18px;
+        font-weight: 300;
+      }
+      .footer-note strong {
+        color: #F4BA44;
+        font-weight: 700;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header-accent"></div>
+        <h2 class="slide-title">Matriz de Motivos Autorizados</h2>
+        
+        <div class="reasons-grid">
+            <div class="reason-card">
+                <div class="reason-icon"><i class="fas fa-user-slash"></i></div>
+                <div class="reason-name">Cliente Ausente</div>
+            </div>
+            <div class="reason-card">
+                <div class="reason-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <div class="reason-name">Endereço não localizado</div>
+            </div>
+            <div class="reason-card">
+                <div class="reason-icon"><i class="fas fa-tools"></i></div>
+                <div class="reason-name">Sem estrutura / Sem PTR</div>
+            </div>
+            <div class="reason-card">
+                <div class="reason-icon"><i class="fas fa-box-open"></i></div>
+                <div class="reason-name">Equipamento não retirado</div>
+            </div>
+            <div class="reason-card">
+                <div class="reason-icon"><i class="fas fa-times-circle"></i></div>
+                <div class="reason-name">Cliente cancelou manutenção</div>
+            </div>
+            <div class="reason-card">
+                <div class="reason-icon"><i class="fas fa-building"></i></div>
+                <div class="reason-name">Condomínio não atendido</div>
+            </div>
+            <div class="reason-card">
+                <div class="reason-icon"><i class="fas fa-signal"></i></div>
+                <div class="reason-name">Condomínio Saturado</div>
+            </div>
+            <div class="reason-card">
+                <div class="reason-icon"><i class="fas fa-ban"></i></div>
+                <div class="reason-name">Área não atendida</div>
+            </div>
+            <div class="reason-card">
+                <div class="reason-icon"><i class="fas fa-chart-pie"></i></div>
+                <div class="reason-name">Área Saturada</div>
+            </div>
+            <div class="reason-card">
+                <div class="reason-icon"><i class="fas fa-unlink"></i></div>
+                <div class="reason-name">Conduíte obstruído</div>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            <i class="fas fa-lightbulb"></i>
+            <p><strong>Inteligência Operacional:</strong> Motivos prioritários organizados no topo do app para reduzir o tempo de busca do técnico em campo.</p>
+        </div>
+    </div>
+</body>
+</html>

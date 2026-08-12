@@ -25,3 +25,6 @@
 - [x] Atualizar apresentação executiva para remover o slide de roadmap e apresentar GPS e Salesforce como capacidades da solução pronta para operação
 - [x] Validar compilação TypeScript, lint e estabilidade após as atualizações finais
 - [x] Salvar checkpoint final e entregar aplicativo e apresentação atualizados para a diretoria
+
+- [x] Revisar e reconstruir a apresentação garantindo a presença da capa institucional (DESKTOP Quebras)
+- [x] Validar visualmente a ordem e o conteúdo dos slides para a diretoria

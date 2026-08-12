@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      * { margin: 0; padding: 0; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        box-sizing: border-box;
+        background: linear-gradient(135deg, #531110 0%, #3a0b0a 100%);
+        position: relative;
+        overflow: hidden;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        padding: 60px 80px;
+      }
+      .accent-bar {
+        width: 100px;
+        height: 8px;
+        background-color: #F4BA44;
+        margin-bottom: 20px;
+      }
+      .slide-title {
+        font-size: 48px;
+        font-weight: 900;
+        color: #FFFFFF;
+        margin-bottom: 40px;
+        letter-spacing: -1px;
+      }
+      .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        align-items: start;
+      }
+      .benefit-card {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 30px;
+        border-left: 6px solid #F4BA44;
+      }
+      .benefit-item {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+      .benefit-icon {
+        width: 50px;
+        height: 50px;
+        background: #F4BA44;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #531110;
+        font-size: 24px;
+        flex-shrink: 0;
+      }
+      .benefit-text h4 {
+        font-size: 22px;
+        font-weight: 800;
+        color: #FFFFFF;
+        margin-bottom: 5px;
+      }
+      .benefit-text p {
+        font-size: 16px;
+        color: #D1D5DB;
+        line-height: 1.4;
+      }
+      .metrics-area {
+        padding-top: 10px;
+      }
+      .metrics-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .metrics-table th {
+        text-align: left;
+        color: #F4BA44;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid rgba(244, 186, 68, 0.3);
+      }
+      .metrics-table td {
+        padding: 20px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .metric-label {
+        color: #FFFFFF;
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .metric-value {
+        color: #F4BA44;
+        font-size: 28px;
+        font-weight: 900;
+        text-align: right;
+      }
+      .ready-badge {
+        position: absolute;
+        bottom: 60px;
+        right: 80px;
+        background-color: #ae2e2a;
+        padding: 15px 35px;
+        color: #FFFFFF;
+        font-weight: 900;
+        letter-spacing: 2px;
+        font-size: 18px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="accent-bar"></div>
+        <h2 class="slide-title">Resultados e Integração Salesforce</h2>
+        
+        <div class="main-grid">
+            <div class="benefit-card">
+                <div class="benefit-item">
+                    <div class="benefit-icon"><i class="fas fa-sync-alt"></i></div>
+                    <div class="benefit-text">
+                        <h4>Sincronização via API</h4>
+                        <p>Atualização instantânea do status da SA no Salesforce, eliminando o delay do reporte manual.</p>
+                    </div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon"><i class="fas fa-map-marker-check"></i></div>
+                    <div class="benefit-text">
+                        <h4>Validação GPS Obrigatória</h4>
+                        <p>Garantia de que a quebra foi solicitada no local exato do atendimento, reduzindo fraudes.</p>
+                    </div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon"><i class="fas fa-database"></i></div>
+                    <div class="benefit-text">
+                        <h4>Base de Dados Auditável</h4>
+                        <p>Histórico completo de fotos e logs de acesso vinculados ao CSSO do técnico.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metrics-area">
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Indicador Operacional</th>
+                            <th style="text-align: right;">Ganhos Reais</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="metric-label">Redução no Tempo de Reporte</td>
+                            <td class="metric-value">90%</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-label">Confiabilidade de Evidências</td>
+                            <td class="metric-value">100%</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-label">Liberação de Agenda (Técnico)</td>
+                            <td class="metric-value">+45 min/dia</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-label">Capacidade de Processamento COP</td>
+                            <td class="metric-value">2x Maior</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="ready-badge">SOLUÇÃO 100% PRONTA PARA OPERAÇÃO</div>
+    </div>
+</body>
+</html>

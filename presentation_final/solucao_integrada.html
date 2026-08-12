@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      * { margin: 0; padding: 0; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        box-sizing: border-box;
+        background-color: #FFFFFF;
+        position: relative;
+        overflow: hidden;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        padding: 60px 80px;
+      }
+      .header-accent {
+        width: 120px;
+        height: 8px;
+        background-color: #F4BA44;
+        margin-bottom: 20px;
+      }
+      .slide-title {
+        font-size: 48px;
+        font-weight: 900;
+        color: #531110;
+        margin-bottom: 50px;
+      }
+      .pillars-container {
+        display: flex;
+        gap: 40px;
+        justify-content: space-between;
+      }
+      .pillar-card {
+        flex: 1;
+        padding: 30px;
+        border-top: 8px solid #531110;
+        background-color: #F9FAFB;
+      }
+      .pillar-card.alt {
+        border-top-color: #ae2e2a;
+      }
+      .pillar-card.highlight {
+        border-top-color: #F4BA44;
+      }
+      .pillar-icon {
+        font-size: 40px;
+        color: #531110;
+        margin-bottom: 20px;
+      }
+      .pillar-card.alt .pillar-icon { color: #ae2e2a; }
+      .pillar-card.highlight .pillar-icon { color: #531110; }
+      
+      .pillar-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #531110;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .pillar-text {
+        font-size: 18px;
+        color: #4B5563;
+        line-height: 1.6;
+      }
+      .status-tag {
+        position: absolute;
+        bottom: 60px;
+        right: 80px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #ae2e2a;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        border: 2px solid #ae2e2a;
+        padding: 8px 20px;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header-accent"></div>
+        <h2 class="slide-title">DESKTOP Quebras: Solução Integrada</h2>
+        
+        <div class="pillars-container">
+            <div class="pillar-card">
+                <div class="pillar-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3 class="pillar-title">Governança</h3>
+                <p class="pillar-text">Autenticação segura via <strong>CSSO Corporativo</strong>. Fim do anonimato no reporte e total rastreabilidade das ações do técnico.</p>
+            </div>
+            
+            <div class="pillar-card alt">
+                <div class="pillar-icon"><i class="fas fa-bolt"></i></div>
+                <h3 class="pillar-title">Agilidade</h3>
+                <p class="pillar-text">Listagem automática de <strong>SAs do dia</strong>. Eliminação de erros de digitação e redução drástica no tempo de espera do COP.</p>
+            </div>
+            
+            <div class="pillar-card highlight">
+                <div class="pillar-icon"><i class="fas fa-crosshairs"></i></div>
+                <h3 class="pillar-title">Precisão</h3>
+                <p class="pillar-text">Validação perimetral por <strong>GPS</strong> e fotos guiadas. Garantia de que a quebra é legítima e auditável no local.</p>
+            </div>
+        </div>
+
+        <div class="status-tag">Solução Pronta para Operação</div>
+    </div>
+</body>
+</html>

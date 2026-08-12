@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      * { margin: 0; padding: 0; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        box-sizing: border-box;
+        background-color: #531110;
+        position: relative;
+        overflow: hidden;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-left: 100px;
+      }
+      .geometric-bg {
+        position: absolute;
+        top: -100px;
+        right: -100px;
+        width: 600px;
+        height: 800px;
+        background-color: #ae2e2a;
+        transform: rotate(15deg);
+        z-index: 0;
+      }
+      .accent-line {
+        position: absolute;
+        top: 0;
+        right: 480px;
+        width: 15px;
+        height: 100%;
+        background-color: #F4BA44;
+        z-index: 1;
+      }
+      .content-box {
+        position: relative;
+        z-index: 2;
+        max-width: 700px;
+      }
+      .pre-title {
+        color: #F4BA44;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+      }
+      .main-title {
+        color: #FFFFFF;
+        font-size: 90px;
+        font-weight: 900;
+        line-height: 1;
+        margin-bottom: 30px;
+        letter-spacing: -2px;
+      }
+      .main-title span {
+        display: block;
+        color: #F4BA44;
+      }
+      .subtitle {
+        color: #E5E7EB;
+        font-size: 28px;
+        font-weight: 300;
+        line-height: 1.4;
+        border-left: 4px solid #F4BA44;
+        padding-left: 25px;
+      }
+      .footer-tag {
+        position: absolute;
+        bottom: 60px;
+        left: 100px;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 16px;
+        font-weight: 500;
+        letter-spacing: 2px;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="geometric-bg"></div>
+        <div class="accent-line"></div>
+        
+        <div class="content-box">
+            <div class="pre-title">Solução Corporativa</div>
+            <h1 class="main-title">DESKTOP <span>Quebras</span></h1>
+            <p class="subtitle">Eficiência Operacional, Governança e Controle de Campo em Tempo Real.</p>
+        </div>
+
+        <div class="footer-tag">DIRETORIA DE OPERAÇÕES • AGOSTO 2026</div>
+    </div>
+</body>
+</html>

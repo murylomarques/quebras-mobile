@@ -1,0 +1,39 @@
+{
+  "slides": [
+    {
+      "id": "problem_slide",
+      "state": "edited",
+      "pageNum": 1
+    },
+    {
+      "id": "solution_overview",
+      "state": "edited",
+      "pageNum": 2
+    },
+    {
+      "id": "login_csso",
+      "state": "edited",
+      "pageNum": 3
+    },
+    {
+      "id": "sa_selection",
+      "state": "edited",
+      "pageNum": 4
+    },
+    {
+      "id": "reasons_matrix",
+      "state": "edited",
+      "pageNum": 5
+    },
+    {
+      "id": "guided_evidence",
+      "state": "edited",
+      "pageNum": 6
+    },
+    {
+      "id": "salesforce_closing",
+      "state": "edited",
+      "pageNum": 7
+    }
+  ]
+}
