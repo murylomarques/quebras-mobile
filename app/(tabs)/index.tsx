@@ -33,22 +33,22 @@ type Reason = { name: string; available: boolean; detail: string };
 type ServiceAppointment = { id: string; address: string; serviceType: string; schedule: string };
 
 const reasons: Reason[] = [
-  { name: "COP - Área não atendida", available: false, detail: "Regras ainda não cadastradas" },
-  { name: "COP - Área Saturada", available: false, detail: "Regras ainda não cadastradas" },
-  { name: "COP - Cliente Ausente", available: false, detail: "Regras ainda não cadastradas" },
-  { name: "COP - Cliente cancelou a manutenção", available: false, detail: "Regras ainda não cadastradas" },
+  // Motivos liberados: aparecem primeiro para agilizar a operação em campo.
+  { name: "COP - Cliente Ausente", available: true, detail: "Fluxo disponível para registro" },
+  { name: "COP - Endereço não localizado", available: true, detail: "Fluxo disponível no MVP" },
+  { name: "COP - Sem estrutura/SEM PTR no local", available: true, detail: "Fluxo disponível para registro" },
+  { name: "COP - Equipamento não retirado - Sem contato com cliente", available: true, detail: "Fluxo disponível para registro" },
+  { name: "COP - Cliente cancelou a manutenção", available: true, detail: "Fluxo disponível para registro" },
+  { name: "COP - Condomínio não atendido", available: true, detail: "Fluxo disponível para registro" },
+  { name: "COP - Condomínio Saturado", available: true, detail: "Fluxo disponível para registro" },
+  { name: "COP - Área não atendida", available: true, detail: "Fluxo disponível para registro" },
+  { name: "COP - Área Saturada", available: true, detail: "Fluxo disponível para registro" },
+  { name: "COP - Conduíte obstruído", available: true, detail: "Fluxo disponível para registro" },
+  // Demais motivos permanecem bloqueados até o cadastramento das regras.
   { name: "COP - Cliente mudou de endereço", available: false, detail: "Regras ainda não cadastradas" },
-  { name: "COP - Condomínio não atendido", available: false, detail: "Regras ainda não cadastradas" },
-  { name: "COP - Condomínio Saturado", available: false, detail: "Regras ainda não cadastradas" },
-  { name: "COP - Conduíte obstruído", available: false, detail: "Regras ainda não cadastradas" },
   { name: "COP - Desistência da Alteração de Plano", available: false, detail: "Regras ainda não cadastradas" },
   { name: "COP - Desistência da Migração", available: false, detail: "Regras ainda não cadastradas" },
   { name: "COP - Desistência da Mudança de Endereço", available: false, detail: "Regras ainda não cadastradas" },
-  { name: "COP - Endereço não localizado", available: true, detail: "Fluxo disponível no MVP" },
-  { name: "COP - Equipamento não retirado", available: false, detail: "Regras ainda não cadastradas" },
-  { name: "COP - Erros de cadastro", available: false, detail: "Regras ainda não cadastradas" },
-  { name: "COP - Sem estrutura / sem PTR no local", available: false, detail: "Regras ainda não cadastradas" },
-  { name: "Retorno ao COP", available: false, detail: "Regras ainda não cadastradas" },
 ];
 
 const technicianServices: ServiceAppointment[] = [
