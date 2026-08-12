@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      .slide-container { 
+        width: 1280px; 
+        min-height: 720px; 
+        box-sizing: border-box; 
+        background-color: #F5F5F5; 
+        position: relative; 
+        overflow: hidden;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      }
+      .header-accent {
+        height: 8px;
+        width: 100px;
+        background-color: #F4BA44;
+        margin-top: 60px;
+        margin-left: 80px;
+      }
+      .slide-title {
+        font-size: 48px;
+        font-weight: 800;
+        color: #531110;
+        margin-top: 20px;
+        margin-left: 80px;
+      }
+      /* Reduced top gap and column width to save vertical space */
+      .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 24px; /* overall gap reduced */
+        margin-top: 40px; /* reduced from 60px */
+        padding-left: 80px;
+        padding-right: 80px;
+      }
+      .feature-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px 16px; /* reduced row-gap and column-gap */
+      }
+      .feature-item h3 {
+        font-size: 28px;
+        font-weight: 800;
+        color: #531110;
+        margin-bottom: 8px; /* slightly reduced */
+      }
+      .feature-item p {
+        font-size: 20px;
+        font-weight: 300;
+        color: #666666;
+        line-height: 1.6;
+        margin: 0;
+      }
+      .mockup-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      /* Shrunk mockup height to fit within 720px without changing fonts */
+      .phone-mockup {
+        width: 280px;
+        height: 320px; /* reduced to save vertical space */
+        background-color: #000000;
+        border-radius: 40px;
+        padding: 12px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      }
+      .phone-screen {
+        width: 100%;
+        height: 100%;
+        background-color: #FFFFFF;
+        border-radius: 30px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 30px; /* reduced from 40 */
+      }
+      .screen-logo {
+        width: 70px;
+        height: 70px;
+        background-color: #531110;
+        border-radius: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px; /* reduced */
+      }
+      .input-field {
+        width: 80%;
+        height: 36px; /* slightly reduced */
+        border: 1px solid #E5E7EB;
+        margin-bottom: 10px; /* reduced */
+        padding-left: 10px;
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        color: #999999;
+      }
+      .login-btn {
+        width: 80%;
+        height: 42px; /* slightly reduced */
+        background-color: #ae2e2a;
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        margin-top: 8px; /* reduced */
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header-accent"></div>
+        <h2 class="slide-title">Acesso Corporativo Seguro por Credenciamento CSSO</h2>
+        
+        <div class="content-grid">
+            <div class="feature-list">
+                <div class="feature-item">
+                    <h3>Identificação Única</h3>
+                    <p>Substituição da matrícula manual pelo padrão corporativo CSSO, garantindo que apenas técnicos autorizados acessem o sistema.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Segurança de Dados</h3>
+                    <p>Autenticação via Usuário e Senha com criptografia de ponta a ponta, protegendo as informações das ordens de serviço.</p>
+                </div>
+                <div class="feature-item" style="grid-column: 1 / span 2;">
+                    <h3>Governança Centralizada</h3>
+                    <p>Controle total sobre quem pode solicitar quebras, com logs de acesso vinculados à identidade do colaborador.</p>
+                </div>
+            </div>
+
+            <div class="mockup-container">
+                <div class="phone-mockup">
+                    <div class="phone-screen">
+                        <div class="screen-logo">
+                            <i class="fas fa-lock" style="color: #F4BA44; font-size: 28px;"></i>
+                        </div>
+                        <div class="input-field">Usuário CSSO</div>
+                        <div class="input-field">Senha</div>
+                        <div class="login-btn">ENTRAR</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

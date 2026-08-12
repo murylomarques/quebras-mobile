@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      body { margin: 0; padding: 0; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        box-sizing: border-box;
+        background-color: #FFFFFF;
+        position: relative;
+        overflow: hidden;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+      }
+      .header-section {
+        padding-top: 60px;
+        padding-left: 80px;
+      }
+      .accent-bar {
+        width: 80px;
+        height: 6px;
+        background-color: #F4BA44;
+        margin-bottom: 15px;
+      }
+      .slide-title {
+        font-size: 44px;
+        font-weight: 800;
+        color: #531110;
+        margin: 0;
+        letter-spacing: -0.5px;
+      }
+      .main-content {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        padding-top: 50px;
+        padding-left: 80px;
+        padding-right: 80px;
+      }
+      .problem-list {
+        display: flex;
+        flex-direction: column;
+        gap: 35px;
+      }
+      .problem-item {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+      }
+      .icon-box {
+        width: 50px;
+        height: 50px;
+        background-color: #ae2e2a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .problem-text h3 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #531110;
+        margin: 0;
+        margin-bottom: 8px;
+      }
+      .problem-text p {
+        font-size: 16px;
+        color: #666666;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .impact-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      .impact-table th {
+        background-color: #531110;
+        color: #FFFFFF;
+        text-align: left;
+        padding: 15px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .impact-table td {
+        padding: 18px 15px;
+        border-bottom: 1px solid #EEEEEE;
+        font-size: 15px;
+        color: #444444;
+      }
+      .impact-table tr:nth-child(even) {
+        background-color: #F9F9F9;
+      }
+      .highlight-red {
+        color: #ae2e2a;
+        font-weight: 700;
+      }
+      .footer-slash {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 200px;
+        height: 10px;
+        background-color: #F4BA44;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header-section">
+            <div class="accent-bar"></div>
+            <h2 class="slide-title">O Desafio Operacional Atual</h2>
+        </div>
+        
+        <div class="main-content">
+            <div class="problem-list">
+                <div class="problem-item">
+                    <div class="icon-box">
+                        <i class="fab fa-whatsapp" style="color: white; font-size: 24px;"></i>
+                    </div>
+                    <div class="problem-text">
+                        <h3>Informalidade na Comunicação</h3>
+                        <p>Uso excessivo de WhatsApp para reporte de quebras, gerando perda de histórico e falta de rastreabilidade oficial.</p>
+                    </div>
+                </div>
+                <div class="problem-item">
+                    <div class="icon-box">
+                        <i class="fas fa-users-cog" style="color: white; font-size: 24px;"></i>
+                    </div>
+                    <div class="problem-text">
+                        <h3>Gargalo no COP</h3>
+                        <p>Técnicos dependem de interação humana para suspender SAs, sobrecarregando a central e aumentando o tempo de espera.</p>
+                    </div>
+                </div>
+                <div class="problem-item">
+                    <div class="icon-box">
+                        <i class="fas fa-file-invoice" style="color: white; font-size: 24px;"></i>
+                    </div>
+                    <div class="problem-text">
+                        <h3>Falta de Evidências Padronizadas</h3>
+                        <p>Fotos sem contexto ou coordenadas GPS dificultam a auditoria e a validação de motivos como "Endereço não localizado".</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-viz">
+                <table class="impact-table">
+                    <thead>
+                        <tr>
+                            <th>Indicador de Dor</th>
+                            <th>Impacto no Negócio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Tempo Médio de Espera</td>
+                            <td><span class="highlight-red">+25 min</span> por técnico/quebra</td>
+                        </tr>
+                        <tr>
+                            <td>Confiabilidade dos Dados</td>
+                            <td>Baixa rastreabilidade em auditorias</td>
+                        </tr>
+                        <tr>
+                            <td>Produtividade de Campo</td>
+                            <td>Redução de <span class="highlight-red">15%</span> na agenda diária</td>
+                        </tr>
+                        <tr>
+                            <td>Custo Operacional</td>
+                            <td>Elevado devido ao retrabalho no COP</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="footer-slash"></div>
+    </div>
+</body>
+</html>

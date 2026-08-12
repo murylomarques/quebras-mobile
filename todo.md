@@ -20,3 +20,8 @@
 - [x] Personalizar instruções e enquadramento da câmera de acordo com o motivo de quebra selecionado (ex.: fachada/portão para endereço não localizado, poste/caixa para infraestrutura)
 - [x] Substituir identificação por matrícula por credenciamento CSSO (CSSO, Usuário e Senha)
 - [x] Ajustar tela de acesso para tratar CSSO como usuário único (apenas campos 'Usuário CSSO' e 'Senha')
+
+- [x] Integrar validação de localização por GPS no fluxo de quebra, com permissão, captura da posição atual e indicação clara de status
+- [x] Atualizar apresentação executiva para remover o slide de roadmap e apresentar GPS e Salesforce como capacidades da solução pronta para operação
+- [x] Validar compilação TypeScript, lint e estabilidade após as atualizações finais
+- [x] Salvar checkpoint final e entregar aplicativo e apresentação atualizados para a diretoria

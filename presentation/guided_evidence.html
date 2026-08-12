@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      html, body { height: 100%; margin: 0; }
+      .slide-container { 
+        width: 1280px; 
+        min-height: 720px; 
+        box-sizing: border-box; 
+        background-color: #F5F5F5; 
+        position: relative; 
+        overflow: hidden;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        margin-top: -1px; /* shift up by 1px so bottom = 719px (top -1 + 720) */
+      }
+      .header-accent {
+        height: 8px;
+        width: 100px;
+        background-color: #F4BA44;
+        margin-top: 60px;
+        margin-left: 80px;
+      }
+      .slide-title {
+        font-size: 48px;
+        font-weight: 800;
+        color: #531110;
+        margin-top: 20px; /* do not shrink upper padding of the title */
+        margin-left: 80px;
+      }
+      .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+        margin-top: 18px; /* pulled up slightly */
+        padding-left: 80px;
+        padding-right: 80px;
+      }
+      .mockup-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .phone-mockup {
+        width: 280px;
+        height: 360px; /* reduced further to save vertical space */
+        background-color: #000000;
+        border-radius: 40px;
+        padding: 8px; /* reduced padding */
+        box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+      }
+      .camera-screen {
+        width: 100%;
+        height: 100%;
+        background-color: #333333;
+        border-radius: 30px;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      .camera-guide {
+        width: 180px;
+        height: 220px; /* reduced */
+        border: 2px dashed #F4BA44;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #F4BA44;
+        font-size: 12px;
+        text-align: center;
+        padding: 12px; /* slightly reduced */
+      }
+      .camera-controls {
+        position: absolute;
+        bottom: 12px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+      .shutter-btn {
+        width: 50px;
+        height: 50px;
+        background-color: #FFFFFF;
+        border-radius: 25px;
+        border: 4px solid #ae2e2a;
+      }
+      .feature-list {
+        display: grid; /* keep grid to reduce vertical stacking */
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+      }
+      .feature-item h3 {
+        font-size: 28px;
+        font-weight: 800;
+        color: #531110;
+        margin-bottom: 8px; /* reduced spacing */
+      }
+      .feature-item p {
+        font-size: 20px;
+        font-weight: 300;
+        color: #666666;
+        line-height: 1.5;
+        margin: 0;
+        max-height: 116px; /* ensure paragraphs don't expand too tall */
+        overflow: hidden; /* truncate overflow rather than growing layout */
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header-accent"></div>
+        <h2 class="slide-title">Captura de Evidências Guiada por Contexto</h2>
+        
+        <div class="content-grid">
+            <div class="mockup-container">
+                <div class="phone-mockup">
+                    <div class="camera-screen">
+                        <div class="camera-guide">
+                            ENQUADRE A FACHADA OU PLACA DO LOGRADOURO
+                        </div>
+                        <div class="camera-controls">
+                            <div class="shutter-btn"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-list">
+                <div class="feature-item">
+                    <h3>Molduras de Enquadramento</h3>
+                    <p>Auxílio visual que indica ao técnico exatamente o que deve ser fotografado, garantindo a qualidade da evidência.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Instruções por Motivo</h3>
+                    <p>Orientações adaptadas conforme o motivo da quebra (ex: foto do portão para cliente ausente, placa para endereço não localizado).</p>
+                </div>
+                <div class="feature-item" style="grid-column: 1 / -1;">
+                    <h3>Confirmação Instantânea</h3>
+                    <p>Visualização da foto capturada com opção de descarte, reduzindo o envio de imagens borradas ou incorretas.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      .slide-container { 
+        width: 1280px; 
+        min-height: 720px; 
+        box-sizing: border-box; 
+        background-color: #F5F5F5; 
+        position: relative; 
+        overflow: hidden;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      }
+      .header-accent {
+        height: 8px;
+        width: 100px;
+        background-color: #F4BA44;
+        margin-top: 60px;
+        margin-left: 80px;
+      }
+      .slide-title {
+        font-size: 48px;
+        font-weight: 800;
+        color: #531110;
+        margin-top: 20px; /* keep unchanged per constraints */
+        margin-left: 80px;
+      }
+      .reasons-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px; /* reduced from 20px to save vertical space */
+        margin-top: 30px; /* slightly reduced to compact layout */
+        padding-left: 80px;
+        padding-right: 80px;
+      }
+      .reason-item {
+        background-color: #FFFFFF;
+        padding: 12px; /* reduced from 20px to save height (keeps font size) */
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        border-left: 6px solid #ae2e2a;
+      }
+      .reason-icon {
+        font-size: 24px;
+        color: #531110;
+        width: 40px;
+        text-align: center;
+      }
+      .reason-text {
+        font-size: 20px;
+        font-weight: 800;
+        color: #333333;
+      }
+      .info-box {
+        margin-top: 24px; /* reduced from 40px to save vertical space */
+        margin-left: 80px;
+        padding: 20px;
+        background-color: #531110;
+        color: #FFFFFF;
+        width: 400px;
+        font-size: 18px;
+        font-weight: 300;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header-accent"></div>
+        <h2 class="slide-title">Matriz de Motivos de Quebra Autorizados</h2>
+        
+        <div class="reasons-grid">
+            <div class="reason-item">
+                <i class="fas fa-user-slash reason-icon"></i>
+                <div class="reason-text">Cliente Ausente</div>
+            </div>
+            <div class="reason-item">
+                <i class="fas fa-map-marker-alt reason-icon"></i>
+                <div class="reason-text">Endereço não localizado</div>
+            </div>
+            <div class="reason-item">
+                <i class="fas fa-tools reason-icon"></i>
+                <div class="reason-text">Sem estrutura / SEM PTR no local</div>
+            </div>
+            <div class="reason-item">
+                <i class="fas fa-box-open reason-icon"></i>
+                <div class="reason-text">Equipamento não retirado</div>
+            </div>
+            <div class="reason-item">
+                <i class="fas fa-times-circle reason-icon"></i>
+                <div class="reason-text">Cliente cancelou a manutenção</div>
+            </div>
+            <div class="reason-item">
+                <i class="fas fa-building reason-icon"></i>
+                <div class="reason-text">Condomínio não atendido</div>
+            </div>
+            <div class="reason-item">
+                <i class="fas fa-signal reason-icon"></i>
+                <div class="reason-text">Condomínio / Área Saturada</div>
+            </div>
+            <div class="reason-item">
+                <i class="fas fa-ban reason-icon"></i>
+                <div class="reason-text">Área não atendida</div>
+            </div>
+            <div class="reason-item">
+                <i class="fas fa-unlink reason-icon"></i>
+                <div class="reason-text">Conduíte obstruído</div>
+            </div>
+            <div class="reason-item">
+                <i class="fas fa-exclamation-triangle reason-icon"></i>
+                <div class="reason-text">Endereço incorreto</div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong>Prioridade Operacional:</strong> Os motivos mais comuns foram movidos para o topo para agilizar o atendimento.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background-color: #FFFFFF;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #531110;
+            position: relative;
+            overflow: hidden;
+        }
+        .header-accent {
+            height: 8px;
+            width: 120px;
+            background-color: #F4BA44;
+            margin-top: 60px;
+            margin-left: 80px;
+        }
+        .bg-slash {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 100%;
+            background-color: #531110;
+            clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%);
+            opacity: 0.03;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="bg-slash"></div>
+        
+        <div class="header-accent"></div>
+        
+        <div class="px-[80px] mt-[20px]">
+            <h1 class="text-[48px] font-black tracking-tight leading-tight">
+                A Solução DESKTOP Quebras:<br/>
+                <span class="text-[#ae2e2a]">Mobilidade e Padronização</span>
+            </h1>
+            
+            <p class="text-[22px] text-[#666666] mt-[20px] max-w-[800px] leading-relaxed">
+                Um ecossistema digital desenhado para eliminar a informalidade e garantir que cada quebra de atendimento seja auditável e instantânea.
+            </p>
+        </div>
+
+        <div class="px-[80px] mt-[60px] flex flex-row justify-between gap-[40px]">
+            <!-- Pilar 1: Governança -->
+            <div class="flex-1 border-t-4 border-[#531110] pt-[25px]">
+                <h3 class="text-[24px] font-bold uppercase tracking-wider text-[#ae2e2a]">Governança</h3>
+                <p class="text-[18px] mt-[15px] text-[#444444] leading-snug">
+                    Acesso restrito via <strong>CSSO Corporativo</strong>. Apenas técnicos autorizados operam o sistema, garantindo total rastreabilidade das ações em campo.
+                </p>
+            </div>
+
+            <!-- Pilar 2: Agilidade -->
+            <div class="flex-1 border-t-4 border-[#F4BA44] pt-[25px]">
+                <h3 class="text-[24px] font-bold uppercase tracking-wider text-[#531110]">Agilidade</h3>
+                <p class="text-[18px] mt-[15px] text-[#444444] leading-snug">
+                    Fim da digitação manual. O app lista automaticamente as <strong>SAs do dia</strong>, reduzindo erros de preenchimento e tempo de reporte.
+                </p>
+            </div>
+
+            <!-- Pilar 3: Precisão -->
+            <div class="flex-1 border-t-4 border-[#531110] pt-[25px]">
+                <h3 class="text-[24px] font-bold uppercase tracking-wider text-[#ae2e2a]">Precisão</h3>
+                <p class="text-[18px] mt-[15px] text-[#444444] leading-snug">
+                    Validação por <strong>GPS e Câmera Guiada</strong>. A quebra só é permitida se o técnico estiver no local correto com a evidência visual adequada.
+                </p>
+            </div>
+        </div>
+
+        <div class="absolute bottom-[60px] left-[80px] flex flex-row items-center gap-[15px]">
+            <div class="w-[40px] h-[40px] bg-[#531110] flex items-center justify-center">
+                <span class="text-[#F4BA44] font-bold text-[20px]">D</span>
+            </div>
+            <span class="text-[16px] font-bold tracking-[2px] text-[#999999]">SOLUÇÃO PRONTA PARA OPERAÇÃO</span>
+        </div>
+    </div>
+</body>
+</html>
