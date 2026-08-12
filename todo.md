@@ -16,4 +16,5 @@
 - [x] Substituir digitação da SA por lista automática de ordens de serviço do técnico (com busca e seleção em 1 toque)
 - [x] Implementar captura de evidência com câmera orientada, moldura de enquadramento e confirmação de foto
 - [x] Validar compilação TypeScript, lint e preview interativo
-- [ ] Salvar checkpoint atualizado e entregar o aplicativo reformulado
+- [x] Salvar checkpoint atualizado e entregar o aplicativo reformulado
+- [x] Personalizar instruções e enquadramento da câmera de acordo com o motivo de quebra selecionado (ex.: fachada/portão para endereço não localizado, poste/caixa para infraestrutura)

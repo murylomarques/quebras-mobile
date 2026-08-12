@@ -58,12 +58,42 @@ const technicianServices: ServiceAppointment[] = [
   { id: "SA-984118", address: "Al. Santos, 1010 • Jardins", serviceType: "Instalação de fibra", schedule: "Amanhã • 14:30" },
 ];
 
-const evidencePoints = [
-  "Foto enviada como evidência do atendimento",
-  "Timestamp presente na evidência, quando disponível",
-  "Localização apresentada na evidência",
-  "Comparação com o endereço cadastrado no Salesforce",
-];
+type EvidenceGuide = {
+  title: string;
+  subtitle: string;
+  points: string[];
+  cameraTitle: string;
+  cameraSubtitle: string;
+  frameHint: string;
+};
+
+const reasonEvidenceConfig: Record<string, EvidenceGuide> = {
+  "COP - Endereço não localizado": {
+    title: "Fachada, placa ou portão",
+    subtitle: "Capture a fachada do imóvel ou a placa da rua para comprovar a tentativa no local correto.",
+    points: [
+      "Foto ampla da fachada ou numeração visível",
+      "Placa de identificação da rua ou condomínio",
+      "Geolocalização capturada no momento do registro",
+      "Registro compatível com o endereço da SA no Salesforce",
+    ],
+    cameraTitle: "Enquadre a fachada ou placa",
+    cameraSubtitle: "Mantenha o número do imóvel ou a placa da rua visível na moldura.",
+    frameHint: "alinhe a fachada ou placa",
+  },
+  default: {
+    title: "Evidência técnica de campo",
+    subtitle: "Fotografe o local da ocorrência para auditoria e encerramento da SA.",
+    points: [
+      "Foto clara do obstáculo ou ponto de atendimento",
+      "Timestamp e coordenadas geográficas",
+      "Registro auditável para o sistema COP",
+    ],
+    cameraTitle: "Enquadre o local da ocorrência",
+    cameraSubtitle: "Mantenha o ponto de atendimento ou obstáculo centralizado.",
+    frameHint: "alinhe o ponto de atendimento",
+  },
+};
 
 const stepTitle: Record<Step, string> = {
   identification: "Identificação",
@@ -248,21 +278,26 @@ export default function HomeScreen() {
         {cameraVisible && (
           <View style={styles.cameraOverlay}>
             <CameraView ref={cameraRef} style={styles.cameraView} facing="back" mode="picture" />
-            <View pointerEvents="none" style={styles.cameraGuideLayer}>
-              <View style={styles.cameraTopCopy}>
-                <Text style={styles.cameraKicker}>EVIDÊNCIA FOTOGRÁFICA</Text>
-                <Text style={styles.cameraTitle}>Enquadre o documento</Text>
-                <Text style={styles.cameraSubtitle}>Mantenha a folha inteira dentro da moldura.</Text>
-              </View>
-              <View style={styles.documentFrame}>
-                <View style={[styles.frameCorner, styles.frameTopLeft]} />
-                <View style={[styles.frameCorner, styles.frameTopRight]} />
-                <View style={[styles.frameCorner, styles.frameBottomLeft]} />
-                <View style={[styles.frameCorner, styles.frameBottomRight]} />
-                <View style={styles.frameHint}><MaterialIcons name="crop-free" size={20} color={colors.background} /><Text style={styles.frameHintText}>alinhe as bordas</Text></View>
-              </View>
-              <View style={styles.cameraBottomCopy}><MaterialIcons name="wb-sunny" size={18} color={colors.warning} /><Text style={styles.cameraBottomText}>Evite reflexos e faça a captura em um local bem iluminado.</Text></View>
-            </View>
+            {(() => {
+              const config = reasonEvidenceConfig[selectedReason] || reasonEvidenceConfig.default;
+              return (
+                <View pointerEvents="none" style={styles.cameraGuideLayer}>
+                  <View style={styles.cameraTopCopy}>
+                    <Text style={styles.cameraKicker}>EVIDÊNCIA TÉCNICA • {selectedReason.toUpperCase()}</Text>
+                    <Text style={styles.cameraTitle}>{config.cameraTitle}</Text>
+                    <Text style={styles.cameraSubtitle}>{config.cameraSubtitle}</Text>
+                  </View>
+                  <View style={styles.documentFrame}>
+                    <View style={[styles.frameCorner, styles.frameTopLeft]} />
+                    <View style={[styles.frameCorner, styles.frameTopRight]} />
+                    <View style={[styles.frameCorner, styles.frameBottomLeft]} />
+                    <View style={[styles.frameCorner, styles.frameBottomRight]} />
+                    <View style={styles.frameHint}><MaterialIcons name="camera-alt" size={18} color={colors.background} /><Text style={styles.frameHintText}>{config.frameHint}</Text></View>
+                  </View>
+                  <View style={styles.cameraBottomCopy}><MaterialIcons name="wb-sunny" size={18} color={colors.warning} /><Text style={styles.cameraBottomText}>Mantenha a câmera firme para um registro nítido.</Text></View>
+                </View>
+              );
+            })()}
             <View style={styles.cameraControls}>
               <Pressable onPress={() => setCameraVisible(false)} style={({ pressed }) => [styles.cameraCancelButton, pressed && styles.iconPressed]}><Text style={styles.cameraCancelText}>Cancelar</Text></Pressable>
               <Pressable onPress={handleCapturePhoto} style={({ pressed }) => [styles.shutterButton, pressed && styles.shutterPressed]}><View style={styles.shutterInner} /></Pressable>
@@ -433,16 +468,23 @@ export default function HomeScreen() {
                   <Text style={styles.selectedReasonText}>{selectedReason}</Text>
                 </View>
               </Animated.View>
-              <Text style={styles.screenHeading}>Monte a evidência</Text>
-              <Text style={styles.screenSubheading}>Confira os pontos que serão organizados para a validação do registro.</Text>
-              <View style={styles.evidenceList}>
-                {evidencePoints.map((point, index) => (
-                  <Animated.View key={point} entering={FadeInDown.delay(index * 70).duration(300)} style={styles.evidenceRow}>
-                    <View style={styles.checkDot}><MaterialIcons name="check" size={14} color={colors.background} /></View>
-                    <Text style={styles.evidenceText}>{point}</Text>
-                  </Animated.View>
-                ))}
-              </View>
+              {(() => {
+                const config = reasonEvidenceConfig[selectedReason] || reasonEvidenceConfig.default;
+                return (
+                  <View>
+                    <Text style={styles.screenHeading}>{config.title}</Text>
+                    <Text style={styles.screenSubheading}>{config.subtitle}</Text>
+                    <View style={styles.evidenceList}>
+                      {config.points.map((point, index) => (
+                        <Animated.View key={point} entering={FadeInDown.delay(index * 70).duration(300)} style={styles.evidenceRow}>
+                          <View style={styles.checkDot}><MaterialIcons name="check" size={14} color={colors.background} /></View>
+                          <Text style={styles.evidenceText}>{point}</Text>
+                        </Animated.View>
+                      ))}
+                    </View>
+                  </View>
+                );
+              })()}
               <View style={styles.evidenceActionArea}>
                 {!evidenceAdded ? (
                   <Pressable onPress={handleOpenCamera} style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}>
