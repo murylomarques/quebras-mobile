@@ -8,4 +8,5 @@
 - [x] Implementar Fluxo Guiado para "COP - Endereço não localizado" com coleta demonstrativa de evidência e preparação das validações
 - [x] Implementar Tela de Sucesso e registro demonstrativo da solicitação
 - [x] Validar compilação TypeScript, testes existentes e preview web do fluxo inicial
+- [x] Corrigir erro HTTP 502 do Expo Go e validar conexão via preview Expo ativo
 - [ ] Criar checkpoint final do MVP
