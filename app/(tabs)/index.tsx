@@ -1,6 +1,7 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as Haptics from "expo-haptics";
-import { useEffect, useMemo, useState } from "react";
+import { CameraView, useCameraPermissions } from "expo-camera";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -11,6 +12,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  Image,
   TextInput,
   View,
 } from "react-native";
@@ -28,7 +30,7 @@ import { useColors } from "@/hooks/use-colors";
 
 type Step = "identification" | "service" | "reason" | "evidence" | "complete";
 type Reason = { name: string; available: boolean; detail: string };
-type ServiceAppointment = { id: string; address: string };
+type ServiceAppointment = { id: string; address: string; serviceType: string; schedule: string };
 
 const reasons: Reason[] = [
   { name: "COP - Área não atendida", available: false, detail: "Regras ainda não cadastradas" },
@@ -47,6 +49,13 @@ const reasons: Reason[] = [
   { name: "COP - Erros de cadastro", available: false, detail: "Regras ainda não cadastradas" },
   { name: "COP - Sem estrutura / sem PTR no local", available: false, detail: "Regras ainda não cadastradas" },
   { name: "Retorno ao COP", available: false, detail: "Regras ainda não cadastradas" },
+];
+
+const technicianServices: ServiceAppointment[] = [
+  { id: "SA-983412", address: "Rua das Palmeiras, 145 • Vila Mariana", serviceType: "Instalação de fibra", schedule: "Hoje • 10:30" },
+  { id: "SA-983587", address: "Av. Brasil, 820 • Bela Vista", serviceType: "Reparo de conexão", schedule: "Hoje • 13:00" },
+  { id: "SA-984021", address: "Rua Harmonia, 64 • Pinheiros", serviceType: "Mudança de endereço", schedule: "Amanhã • 08:00" },
+  { id: "SA-984118", address: "Al. Santos, 1010 • Jardins", serviceType: "Instalação de fibra", schedule: "Amanhã • 14:30" },
 ];
 
 const evidencePoints = [
@@ -77,11 +86,19 @@ export default function HomeScreen() {
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [step, setStep] = useState<Step>("identification");
   const [technicianId, setTechnicianId] = useState("");
-  const [serviceId, setServiceId] = useState("");
+  const [serviceSearch, setServiceSearch] = useState("");
   const [selectedService, setSelectedService] = useState<ServiceAppointment | null>(null);
   const [selectedReason, setSelectedReason] = useState("");
   const [evidenceAdded, setEvidenceAdded] = useState(false);
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [cameraVisible, setCameraVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+  const cameraRef = useRef<CameraView>(null);
+  const filteredServices = useMemo(
+    () => technicianServices.filter((service) => `${service.id} ${service.address} ${service.serviceType}`.toLowerCase().includes(serviceSearch.toLowerCase().trim())),
+    [serviceSearch],
+  );
 
   const screenProgress = useSharedValue(1);
   const brandPulse = useSharedValue(0);
@@ -126,13 +143,9 @@ export default function HomeScreen() {
     setStep("service");
   };
 
-  const handleServiceSelection = () => {
-    if (!serviceId.trim()) {
-      Alert.alert("SA necessária", "Informe o número da SA para continuar.");
-      return;
-    }
+  const handleServiceSelection = (service: ServiceAppointment) => {
     tapFeedback();
-    setSelectedService({ id: serviceId.trim().toUpperCase(), address: "Endereço ainda não consultado" });
+    setSelectedService(service);
     setStep("reason");
   };
 
@@ -146,9 +159,40 @@ export default function HomeScreen() {
     setStep("evidence");
   };
 
-  const handleAddEvidence = () => {
+  const handleOpenCamera = async () => {
     tapFeedback();
-    setEvidenceAdded(true);
+    if (Platform.OS === "web") {
+      Alert.alert("Modo de demonstração", "A câmera guiada será ativada no app instalado no Android ou iOS.");
+      setPhotoUri("demo-photo");
+      setEvidenceAdded(true);
+      return;
+    }
+    if (!cameraPermission?.granted) {
+      const response = await requestCameraPermission();
+      if (!response.granted) {
+        Alert.alert("Câmera bloqueada", "Permita o acesso à câmera nas configurações do aparelho para fotografar a evidência.");
+        return;
+      }
+    }
+    setCameraVisible(true);
+  };
+
+  const handleCapturePhoto = async () => {
+    if (!cameraRef.current) return;
+    tapFeedback();
+    const photo = await cameraRef.current.takePictureAsync({ quality: 0.86, skipProcessing: Platform.OS === "android" });
+    if (photo?.uri) {
+      setPhotoUri(photo.uri);
+      setEvidenceAdded(true);
+      setCameraVisible(false);
+      if (Platform.OS !== "web") void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+  };
+
+  const handleRetakePhoto = () => {
+    setPhotoUri(null);
+    setEvidenceAdded(false);
+    setCameraVisible(true);
   };
 
   const handleSubmit = () => {
@@ -167,10 +211,11 @@ export default function HomeScreen() {
 
   const handleReset = () => {
     tapFeedback();
-    setServiceId("");
     setSelectedService(null);
     setSelectedReason("");
     setEvidenceAdded(false);
+    setPhotoUri(null);
+    setServiceSearch("");
     setStep("service");
   };
 
@@ -200,6 +245,31 @@ export default function HomeScreen() {
   return (
     <ScreenContainer className="flex-1" containerClassName="bg-background">
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.keyboard}>
+        {cameraVisible && (
+          <View style={styles.cameraOverlay}>
+            <CameraView ref={cameraRef} style={styles.cameraView} facing="back" mode="picture" />
+            <View pointerEvents="none" style={styles.cameraGuideLayer}>
+              <View style={styles.cameraTopCopy}>
+                <Text style={styles.cameraKicker}>EVIDÊNCIA FOTOGRÁFICA</Text>
+                <Text style={styles.cameraTitle}>Enquadre o documento</Text>
+                <Text style={styles.cameraSubtitle}>Mantenha a folha inteira dentro da moldura.</Text>
+              </View>
+              <View style={styles.documentFrame}>
+                <View style={[styles.frameCorner, styles.frameTopLeft]} />
+                <View style={[styles.frameCorner, styles.frameTopRight]} />
+                <View style={[styles.frameCorner, styles.frameBottomLeft]} />
+                <View style={[styles.frameCorner, styles.frameBottomRight]} />
+                <View style={styles.frameHint}><MaterialIcons name="crop-free" size={20} color={colors.background} /><Text style={styles.frameHintText}>alinhe as bordas</Text></View>
+              </View>
+              <View style={styles.cameraBottomCopy}><MaterialIcons name="wb-sunny" size={18} color={colors.warning} /><Text style={styles.cameraBottomText}>Evite reflexos e faça a captura em um local bem iluminado.</Text></View>
+            </View>
+            <View style={styles.cameraControls}>
+              <Pressable onPress={() => setCameraVisible(false)} style={({ pressed }) => [styles.cameraCancelButton, pressed && styles.iconPressed]}><Text style={styles.cameraCancelText}>Cancelar</Text></Pressable>
+              <Pressable onPress={handleCapturePhoto} style={({ pressed }) => [styles.shutterButton, pressed && styles.shutterPressed]}><View style={styles.shutterInner} /></Pressable>
+              <View style={styles.cameraControlSpacer} />
+            </View>
+          </View>
+        )}
         {renderTopBar()}
         <Animated.View style={[styles.content, screenAnimatedStyle]}>
           {step === "identification" && (
@@ -258,36 +328,64 @@ export default function HomeScreen() {
           )}
 
           {step === "service" && (
-            <ScrollView contentContainerStyle={styles.formScreenContent} keyboardShouldPersistTaps="handled">
-              <Animated.View entering={FadeInDown.duration(300)} style={styles.contextCard}>
-                <View style={styles.contextIcon}><MaterialIcons name="person-outline" size={22} color={colors.primary} /></View>
-                <View style={styles.contextCopy}>
-                  <Text style={styles.contextLabel}>TÉCNICO IDENTIFICADO</Text>
-                  <Text style={styles.contextValue}>{technicianId.toUpperCase()}</Text>
+            <FlatList
+              data={filteredServices}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.serviceList}
+              keyboardShouldPersistTaps="handled"
+              ListHeaderComponent={
+                <View>
+                  <Animated.View entering={FadeInDown.duration(300)} style={styles.contextCard}>
+                    <View style={styles.contextIcon}><MaterialIcons name="person-outline" size={22} color={colors.primary} /></View>
+                    <View style={styles.contextCopy}>
+                      <Text style={styles.contextLabel}>TÉCNICO IDENTIFICADO</Text>
+                      <Text style={styles.contextValue}>{technicianId.toUpperCase()}</Text>
+                    </View>
+                    <View style={styles.statusDot} />
+                  </Animated.View>
+                  <Animated.View entering={FadeInDown.delay(80).duration(320)}>
+                    <Text style={styles.formEyebrow}>ORDEM DE SERVIÇO</Text>
+                    <Text style={styles.screenHeading}>Escolha uma SA</Text>
+                    <Text style={styles.screenSubheading}>Estas são as ordens disponíveis para o seu atendimento.</Text>
+                    <View style={styles.searchBox}>
+                      <MaterialIcons name="search" size={20} color={colors.muted} />
+                      <TextInput
+                        style={styles.searchInput}
+                        placeholder="Buscar por SA, endereço ou serviço"
+                        placeholderTextColor={colors.muted}
+                        value={serviceSearch}
+                        onChangeText={setServiceSearch}
+                        returnKeyType="search"
+                      />
+                    </View>
+                    <View style={styles.serviceCountRow}>
+                      <Text style={styles.serviceCount}>{filteredServices.length} atendimentos encontrados</Text>
+                      <MaterialIcons name="touch-app" size={17} color={colors.primary} />
+                    </View>
+                  </Animated.View>
                 </View>
-                <View style={styles.statusDot} />
-              </Animated.View>
-              <Animated.View entering={FadeInDown.delay(80).duration(320)} style={styles.formCardCompact}>
-                <Text style={styles.formEyebrow}>ORDEM DE SERVIÇO</Text>
-                <Text style={styles.screenHeading}>Qual SA será registrada?</Text>
-                <Text style={styles.screenSubheading}>Informe o número da solicitação técnica para carregar o próximo passo.</Text>
-                <Text style={styles.inputLabel}>Número da SA</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Ex.: SA-987654"
-                  placeholderTextColor={colors.muted}
-                  value={serviceId}
-                  onChangeText={setServiceId}
-                  returnKeyType="done"
-                  onSubmitEditing={handleServiceSelection}
-                  autoCapitalize="characters"
-                />
-                <Pressable onPress={handleServiceSelection} style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}>
-                  <Text style={styles.primaryButtonText}>Continuar</Text>
-                  <MaterialIcons name="arrow-forward" size={20} color={colors.background} />
-                </Pressable>
-              </Animated.View>
-            </ScrollView>
+              }
+              ListEmptyComponent={
+                <View style={styles.emptyState}>
+                  <MaterialIcons name="search-off" size={34} color={colors.muted} />
+                  <Text style={styles.emptyTitle}>Nenhuma SA encontrada</Text>
+                  <Text style={styles.emptyText}>Tente buscar por outro número ou endereço.</Text>
+                </View>
+              }
+              renderItem={({ item, index }) => (
+                <Animated.View entering={FadeInDown.delay(Math.min(index, 5) * 55).duration(300)}>
+                  <Pressable onPress={() => handleServiceSelection(item)} style={({ pressed }) => [styles.serviceCard, pressed && styles.cardPressed]}>
+                    <View style={styles.serviceCardTop}>
+                      <View style={styles.serviceIcon}><MaterialIcons name="assignment" size={20} color={colors.primary} /></View>
+                      <View style={styles.serviceCardTitleWrap}><Text style={styles.serviceCardId}>{item.id}</Text><Text style={styles.serviceSchedule}>{item.schedule}</Text></View>
+                      <MaterialIcons name="arrow-forward-ios" size={16} color={colors.primary} />
+                    </View>
+                    <Text style={styles.serviceType}>{item.serviceType}</Text>
+                    <View style={styles.serviceAddressRow}><MaterialIcons name="location-on" size={16} color={colors.muted} /><Text style={styles.serviceAddress}>{item.address}</Text></View>
+                  </Pressable>
+                </Animated.View>
+              )}
+            />
           )}
 
           {step === "reason" && (
@@ -347,18 +445,18 @@ export default function HomeScreen() {
               </View>
               <View style={styles.evidenceActionArea}>
                 {!evidenceAdded ? (
-                  <Pressable onPress={handleAddEvidence} style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}>
+                  <Pressable onPress={handleOpenCamera} style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}>
                     <MaterialIcons name="photo-camera" size={22} color={colors.primary} />
-                    <Text style={styles.secondaryButtonText}>Adicionar evidência</Text>
+                    <Text style={styles.secondaryButtonText}>Abrir câmera guiada</Text>
                   </Pressable>
                 ) : (
                   <Animated.View entering={FadeInDown.duration(240)} style={styles.evidenceAddedCard}>
-                    <View style={styles.evidenceAddedIcon}><MaterialIcons name="check" size={19} color={colors.background} /></View>
+                    {photoUri && photoUri !== "demo-photo" ? <Image source={{ uri: photoUri }} style={styles.photoThumb} /> : <View style={styles.evidenceAddedIcon}><MaterialIcons name="check" size={19} color={colors.background} /></View>}
                     <View style={styles.evidenceAddedCopy}>
                       <Text style={styles.evidenceAddedTitle}>Evidência capturada</Text>
                       <Text style={styles.evidenceAddedText}>Pronta para a etapa de validação.</Text>
                     </View>
-                    <MaterialIcons name="done-all" size={20} color={colors.success} />
+                    <Pressable onPress={handleRetakePhoto} style={({ pressed }) => [styles.retakeButton, pressed && styles.iconPressed]}><MaterialIcons name="refresh" size={18} color={colors.primary} /></Pressable>
                   </Animated.View>
                 )}
                 <Pressable
@@ -441,6 +539,23 @@ const makeStyles = (colors: any) => StyleSheet.create({
   localNotice: { flexDirection: "row", alignItems: "center", justifyContent: "center", marginTop: 18, gap: 6 },
   localNoticeText: { color: colors.muted, fontSize: 11, fontWeight: "600" },
   formScreenContent: { flexGrow: 1, padding: 20, gap: 18 },
+  serviceList: { padding: 20, paddingBottom: 32, gap: 12 },
+  searchBox: { minHeight: 50, flexDirection: "row", alignItems: "center", gap: 9, paddingHorizontal: 14, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, marginBottom: 11 },
+  searchInput: { flex: 1, color: colors.foreground, fontSize: 14, paddingVertical: 0 },
+  serviceCountRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 13 },
+  serviceCount: { color: colors.muted, fontSize: 11, fontWeight: "800", letterSpacing: 0.2 },
+  serviceCard: { padding: 15, borderRadius: 18, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+  serviceCardTop: { flexDirection: "row", alignItems: "center" },
+  serviceIcon: { width: 41, height: 41, borderRadius: 13, alignItems: "center", justifyContent: "center", backgroundColor: colors.primary + "16" },
+  serviceCardTitleWrap: { flex: 1, marginLeft: 11 },
+  serviceCardId: { color: colors.foreground, fontSize: 15, fontWeight: "900", letterSpacing: 0.3 },
+  serviceSchedule: { color: colors.primary, fontSize: 11, fontWeight: "800", marginTop: 4 },
+  serviceType: { color: colors.foreground, fontSize: 13, fontWeight: "800", marginTop: 14 },
+  serviceAddressRow: { flexDirection: "row", alignItems: "center", gap: 5, marginTop: 8 },
+  serviceAddress: { flex: 1, color: colors.muted, fontSize: 12, lineHeight: 17 },
+  emptyState: { alignItems: "center", justifyContent: "center", paddingVertical: 50, paddingHorizontal: 24 },
+  emptyTitle: { color: colors.foreground, fontSize: 16, fontWeight: "900", marginTop: 13 },
+  emptyText: { color: colors.muted, fontSize: 13, textAlign: "center", lineHeight: 19, marginTop: 7 },
   contextCard: { flexDirection: "row", alignItems: "center", padding: 15, borderRadius: 17, backgroundColor: colors.accent, borderWidth: 1, borderColor: colors.accent },
   contextIcon: { width: 39, height: 39, borderRadius: 12, backgroundColor: colors.warning, alignItems: "center", justifyContent: "center" },
   contextCopy: { flex: 1, marginLeft: 12 },
@@ -478,6 +593,7 @@ const makeStyles = (colors: any) => StyleSheet.create({
   evidenceAddedCopy: { flex: 1, marginLeft: 10 },
   evidenceAddedTitle: { color: colors.success, fontSize: 13, fontWeight: "900" },
   evidenceAddedText: { color: colors.muted, fontSize: 11, marginTop: 3 },
+  retakeButton: { width: 36, height: 36, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: colors.primary + "16" },
   completeContent: { flexGrow: 1, alignItems: "center", justifyContent: "center", padding: 22 },
   completeIcon: { width: 92, height: 92, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.primary, marginBottom: 22, shadowColor: colors.primary, shadowOpacity: 0.3, shadowRadius: 15, shadowOffset: { width: 0, height: 8 }, elevation: 4 },
   completeKicker: { color: colors.primary, fontSize: 10, fontWeight: "900", letterSpacing: 1.5, textAlign: "center" },
@@ -488,4 +604,29 @@ const makeStyles = (colors: any) => StyleSheet.create({
   summaryText: { flex: 1, color: colors.foreground, fontSize: 13, lineHeight: 18, fontWeight: "700" },
   summaryDivider: { height: 1, backgroundColor: colors.border, marginVertical: 14 },
   fullButton: { width: "100%" },
+  photoThumb: { width: 42, height: 42, borderRadius: 12, backgroundColor: colors.border },
+  cameraOverlay: { position: "absolute", zIndex: 30, top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "#080808" },
+  cameraView: { flex: 1 },
+  cameraGuideLayer: { position: "absolute", top: 0, right: 0, bottom: 108, left: 0, justifyContent: "center", alignItems: "center", paddingHorizontal: 24, backgroundColor: "#00000028" },
+  cameraTopCopy: { position: "absolute", top: 48, left: 24, right: 24 },
+  cameraKicker: { color: colors.warning, fontSize: 10, fontWeight: "900", letterSpacing: 1.4 },
+  cameraTitle: { color: colors.background, fontSize: 28, lineHeight: 34, fontWeight: "900", marginTop: 8 },
+  cameraSubtitle: { color: "#eeeeee", fontSize: 13, lineHeight: 19, marginTop: 5 },
+  documentFrame: { width: "100%", height: 250, borderRadius: 14, position: "relative", borderWidth: 1, borderColor: "#ffffff55", backgroundColor: "#ffffff08" },
+  frameCorner: { position: "absolute", width: 34, height: 34, borderColor: colors.warning },
+  frameTopLeft: { top: -2, left: -2, borderTopWidth: 4, borderLeftWidth: 4, borderTopLeftRadius: 12 },
+  frameTopRight: { top: -2, right: -2, borderTopWidth: 4, borderRightWidth: 4, borderTopRightRadius: 12 },
+  frameBottomLeft: { bottom: -2, left: -2, borderBottomWidth: 4, borderLeftWidth: 4, borderBottomLeftRadius: 12 },
+  frameBottomRight: { bottom: -2, right: -2, borderBottomWidth: 4, borderRightWidth: 4, borderBottomRightRadius: 12 },
+  frameHint: { flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "center", marginTop: 108, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 99, backgroundColor: "#00000066" },
+  frameHintText: { color: colors.background, fontSize: 12, fontWeight: "800" },
+  cameraBottomCopy: { position: "absolute", bottom: 20, left: 24, right: 24, flexDirection: "row", alignItems: "center", gap: 8 },
+  cameraBottomText: { flex: 1, color: "#eeeeee", fontSize: 12, lineHeight: 17 },
+  cameraControls: { height: 108, position: "absolute", left: 0, right: 0, bottom: 0, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 26, backgroundColor: "#080808" },
+  cameraCancelButton: { minWidth: 76, paddingVertical: 12 },
+  cameraCancelText: { color: colors.background, fontSize: 14, fontWeight: "800" },
+  cameraControlSpacer: { width: 76 },
+  shutterButton: { width: 72, height: 72, borderRadius: 36, borderWidth: 4, borderColor: colors.background, alignItems: "center", justifyContent: "center" },
+  shutterInner: { width: 58, height: 58, borderRadius: 29, backgroundColor: colors.warning },
+  shutterPressed: { transform: [{ scale: 0.9 }], opacity: 0.85 },
 });

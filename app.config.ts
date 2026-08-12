@@ -87,6 +87,14 @@ const config: ExpoConfig = {
   plugins: [
     "expo-router",
     [
+      "expo-camera",
+      {
+        cameraPermission: "Permitir que o DESKTOP acesse a câmera para registrar evidências.",
+        microphonePermission: "Permitir que o DESKTOP use o microfone quando necessário.",
+        recordAudioAndroid: false,
+      },
+    ],
+    [
       "expo-audio",
       {
         microphonePermission: "Allow $(PRODUCT_NAME) to access your microphone.",

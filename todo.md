@@ -13,4 +13,7 @@
 - [x] Adicionar animações fluidas e microinterações modernas em React Native Reanimated
 - [x] Aplicar marca oficial DESKTOP em todas as telas e cabeçalhos
 - [x] Validar compilação TypeScript, lint e estabilidade do Metro Bundler
-- [ ] Salvar checkpoint atualizado e entregar o aplicativo completo
+- [x] Substituir digitação da SA por lista automática de ordens de serviço do técnico (com busca e seleção em 1 toque)
+- [x] Implementar captura de evidência com câmera orientada, moldura de enquadramento e confirmação de foto
+- [x] Validar compilação TypeScript, lint e preview interativo
+- [ ] Salvar checkpoint atualizado e entregar o aplicativo reformulado
