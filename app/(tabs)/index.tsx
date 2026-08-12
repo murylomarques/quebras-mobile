@@ -115,7 +115,9 @@ export default function HomeScreen() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [step, setStep] = useState<Step>("identification");
-  const [technicianId, setTechnicianId] = useState("");
+  const [csso, setCsso] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [serviceSearch, setServiceSearch] = useState("");
   const [selectedService, setSelectedService] = useState<ServiceAppointment | null>(null);
   const [selectedReason, setSelectedReason] = useState("");
@@ -165,8 +167,8 @@ export default function HomeScreen() {
   };
 
   const handleIdentification = () => {
-    if (!technicianId.trim()) {
-      Alert.alert("Identificação necessária", "Informe sua matrícula ou ID para continuar.");
+    if (!csso.trim() || !username.trim() || !password.trim()) {
+      Alert.alert("Acesso necessário", "Preencha o CSSO, o usuário e a senha para continuar.");
       return;
     }
     tapFeedback();
@@ -335,17 +337,40 @@ export default function HomeScreen() {
                   </View>
                   <View style={styles.formBadge}><MaterialIcons name="verified-user" size={18} color={colors.primary} /></View>
                 </View>
-                <Text style={styles.formHint}>Use sua matrícula para iniciar um novo registro de quebra.</Text>
-                <Text style={styles.inputLabel}>Matrícula / ID do técnico</Text>
+                <Text style={styles.formHint}>Acesse o ambiente DESKTOP com suas credenciais corporativas.</Text>
+                <Text style={styles.inputLabel}>CSSO</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Ex.: T12345"
+                  placeholder="Ex.: 123456"
                   placeholderTextColor={colors.muted}
-                  value={technicianId}
-                  onChangeText={setTechnicianId}
+                  value={csso}
+                  onChangeText={setCsso}
+                  returnKeyType="next"
+                  keyboardType="number-pad"
+                />
+                <Text style={styles.inputLabel}>Usuário</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Digite seu usuário"
+                  placeholderTextColor={colors.muted}
+                  value={username}
+                  onChangeText={setUsername}
+                  returnKeyType="next"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                <Text style={styles.inputLabel}>Senha</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Digite sua senha"
+                  placeholderTextColor={colors.muted}
+                  value={password}
+                  onChangeText={setPassword}
                   returnKeyType="done"
                   onSubmitEditing={handleIdentification}
-                  autoCapitalize="characters"
+                  secureTextEntry
+                  autoCapitalize="none"
+                  autoCorrect={false}
                 />
                 <Pressable
                   onPress={handleIdentification}
@@ -374,7 +399,7 @@ export default function HomeScreen() {
                     <View style={styles.contextIcon}><MaterialIcons name="person-outline" size={22} color={colors.primary} /></View>
                     <View style={styles.contextCopy}>
                       <Text style={styles.contextLabel}>TÉCNICO IDENTIFICADO</Text>
-                      <Text style={styles.contextValue}>{technicianId.toUpperCase()}</Text>
+                      <Text style={styles.contextValue}>{username.toUpperCase()} • CSSO {csso.toUpperCase()}</Text>
                     </View>
                     <View style={styles.statusDot} />
                   </Animated.View>

@@ -18,3 +18,4 @@
 - [x] Validar compilação TypeScript, lint e preview interativo
 - [x] Salvar checkpoint atualizado e entregar o aplicativo reformulado
 - [x] Personalizar instruções e enquadramento da câmera de acordo com o motivo de quebra selecionado (ex.: fachada/portão para endereço não localizado, poste/caixa para infraestrutura)
+- [x] Substituir identificação por matrícula por credenciamento CSSO (CSSO, Usuário e Senha)
