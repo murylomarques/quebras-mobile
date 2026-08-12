@@ -115,7 +115,6 @@ export default function HomeScreen() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [step, setStep] = useState<Step>("identification");
-  const [csso, setCsso] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [serviceSearch, setServiceSearch] = useState("");
@@ -167,8 +166,8 @@ export default function HomeScreen() {
   };
 
   const handleIdentification = () => {
-    if (!csso.trim() || !username.trim() || !password.trim()) {
-      Alert.alert("Acesso necessário", "Preencha o CSSO, o usuário e a senha para continuar.");
+    if (!username.trim() || !password.trim()) {
+      Alert.alert("Acesso necessário", "Preencha o usuário CSSO e a senha para continuar.");
       return;
     }
     tapFeedback();
@@ -338,20 +337,10 @@ export default function HomeScreen() {
                   <View style={styles.formBadge}><MaterialIcons name="verified-user" size={18} color={colors.primary} /></View>
                 </View>
                 <Text style={styles.formHint}>Acesse o ambiente DESKTOP com suas credenciais corporativas.</Text>
-                <Text style={styles.inputLabel}>CSSO</Text>
+                <Text style={styles.inputLabel}>Usuário CSSO</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Ex.: 123456"
-                  placeholderTextColor={colors.muted}
-                  value={csso}
-                  onChangeText={setCsso}
-                  returnKeyType="next"
-                  keyboardType="number-pad"
-                />
-                <Text style={styles.inputLabel}>Usuário</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Digite seu usuário"
+                  placeholder="Digite seu usuário CSSO"
                   placeholderTextColor={colors.muted}
                   value={username}
                   onChangeText={setUsername}
@@ -399,7 +388,7 @@ export default function HomeScreen() {
                     <View style={styles.contextIcon}><MaterialIcons name="person-outline" size={22} color={colors.primary} /></View>
                     <View style={styles.contextCopy}>
                       <Text style={styles.contextLabel}>TÉCNICO IDENTIFICADO</Text>
-                      <Text style={styles.contextValue}>{username.toUpperCase()} • CSSO {csso.toUpperCase()}</Text>
+                      <Text style={styles.contextValue}>{username.toUpperCase()}</Text>
                     </View>
                     <View style={styles.statusDot} />
                   </Animated.View>
