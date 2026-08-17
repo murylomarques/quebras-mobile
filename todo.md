@@ -28,3 +28,5 @@
 
 - [x] Revisar e reconstruir a apresentação garantindo a presença da capa institucional (DESKTOP Quebras)
 - [x] Validar visualmente a ordem e o conteúdo dos slides para a diretoria
+
+- [x] Implementar orientação por voz e texto guiada na câmera com instruções contextuais para cada motivo de quebra (ex.: "Encontre o número do imóvel", "Afaste o celular", "Fachada da casa")

@@ -1,5 +1,6 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as Haptics from "expo-haptics";
+import * as Speech from "expo-speech";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -65,6 +66,7 @@ type EvidenceGuide = {
   cameraTitle: string;
   cameraSubtitle: string;
   frameHint: string;
+  voiceSteps: string[];
 };
 
 const reasonEvidenceConfig: Record<string, EvidenceGuide> = {
@@ -80,6 +82,12 @@ const reasonEvidenceConfig: Record<string, EvidenceGuide> = {
     cameraTitle: "Enquadre a fachada ou placa",
     cameraSubtitle: "Mantenha o número do imóvel ou a placa da rua visível na moldura.",
     frameHint: "alinhe a fachada ou placa",
+    voiceSteps: [
+      "Mostre a fachada da casa ou o portão.",
+      "Aproxime o celular para encontrar o número do imóvel.",
+      "Afaste o celular até enquadrar toda a fachada.",
+      "Confira se o número ou a placa da rua está visível.",
+    ],
   },
   default: {
     title: "Evidência técnica de campo",
@@ -92,7 +100,76 @@ const reasonEvidenceConfig: Record<string, EvidenceGuide> = {
     cameraTitle: "Enquadre o local da ocorrência",
     cameraSubtitle: "Mantenha o ponto de atendimento ou obstáculo centralizado.",
     frameHint: "alinhe o ponto de atendimento",
+    voiceSteps: [
+      "Mostre o ponto da ocorrência ou o obstáculo no local.",
+      "Aproxime o celular para registrar o detalhe técnico.",
+      "Afaste o celular para mostrar o contexto do atendimento.",
+      "Mantenha a câmera firme e confirme que a evidência está nítida.",
+    ],
   },
+};
+
+const voiceStepsByReason: Record<string, string[]> = {
+  "COP - Cliente Ausente": [
+    "Mostre a fachada da casa e o portão de entrada.",
+    "Aproxime o celular do interfone ou campainha.",
+    "Afaste o celular para mostrar a fachada completa.",
+    "Confirme que a entrada do imóvel está visível.",
+  ],
+  "COP - Sem estrutura/SEM PTR no local": [
+    "Mostre o ponto onde deveria estar a estrutura ou o PTR.",
+    "Aproxime o celular para registrar a ausência ou o obstáculo.",
+    "Afaste o celular para mostrar o entorno do local.",
+    "Mantenha a imagem firme e bem iluminada.",
+  ],
+  "COP - Equipamento não retirado - Sem contato com cliente": [
+    "Mostre a fachada e o local onde o equipamento deveria ser retirado.",
+    "Aproxime o celular para registrar o equipamento ou a ausência dele.",
+    "Afaste o celular para identificar o endereço completo.",
+    "Confira se a evidência está nítida antes de fotografar.",
+  ],
+  "COP - Cliente cancelou a manutenção": [
+    "Mostre a fachada ou a entrada do imóvel atendido.",
+    "Aproxime o celular do local da manutenção.",
+    "Afaste o celular para registrar o contexto do atendimento.",
+    "Mantenha a câmera firme para concluir a evidência.",
+  ],
+  "COP - Condomínio não atendido": [
+    "Mostre a entrada principal do condomínio.",
+    "Aproxime o celular da portaria ou da identificação do condomínio.",
+    "Afaste o celular para enquadrar toda a entrada.",
+    "Confirme que a identificação do condomínio está legível.",
+  ],
+  "COP - Condomínio Saturado": [
+    "Mostre a entrada ou o ponto de atendimento do condomínio.",
+    "Aproxime o celular da estrutura ou do equipamento saturado.",
+    "Afaste o celular para mostrar o contexto do local.",
+    "Mantenha a evidência nítida e bem enquadrada.",
+  ],
+  "COP - Área não atendida": [
+    "Mostre a rua e a fachada do imóvel atendido.",
+    "Aproxime o celular da placa ou do número do endereço.",
+    "Afaste o celular para mostrar o entorno da área.",
+    "Confira se a localização está claramente identificada.",
+  ],
+  "COP - Área Saturada": [
+    "Mostre a rua e o ponto de atendimento da área.",
+    "Aproxime o celular da estrutura ou equipamento relevante.",
+    "Afaste o celular para mostrar o contexto da área.",
+    "Mantenha a câmera firme e confirme a nitidez da imagem.",
+  ],
+  "COP - Conduíte obstruído": [
+    "Mostre o trecho do conduíte obstruído.",
+    "Aproxime o celular para registrar o ponto da obstrução.",
+    "Afaste o celular para mostrar o caminho completo do conduíte.",
+    "Confira se o obstáculo está visível antes de fotografar.",
+  ],
+};
+
+const getEvidenceGuide = (reason: string): EvidenceGuide => {
+  const baseGuide = reasonEvidenceConfig[reason] || reasonEvidenceConfig.default;
+  const customVoiceSteps = voiceStepsByReason[reason];
+  return customVoiceSteps ? { ...baseGuide, voiceSteps: customVoiceSteps } : baseGuide;
 };
 
 const stepTitle: Record<Step, string> = {
@@ -123,6 +200,9 @@ export default function HomeScreen() {
   const [evidenceAdded, setEvidenceAdded] = useState(false);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [cameraVisible, setCameraVisible] = useState(false);
+  const [isVoiceGuidanceEnabled, setIsVoiceGuidanceEnabled] = useState(true);
+  const [guidanceIndex, setGuidanceIndex] = useState(0);
+  const [guidanceText, setGuidanceText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
@@ -152,6 +232,34 @@ export default function HomeScreen() {
       withTiming(0, { duration: 420, easing: Easing.inOut(Easing.quad) }),
     );
   }, [brandPulse]);
+
+  useEffect(() => {
+    if (!cameraVisible || !isVoiceGuidanceEnabled) {
+      void Speech.stop();
+      return;
+    }
+
+    const guide = getEvidenceGuide(selectedReason);
+    let currentIndex = 0;
+    const speakGuidance = (text: string) => {
+      setGuidanceText(text);
+      void Speech.stop();
+      Speech.speak(text, { language: "pt-BR", rate: 0.92, pitch: 1, volume: 1 });
+    };
+
+    setGuidanceIndex(0);
+    speakGuidance(guide.voiceSteps[currentIndex]);
+    const interval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % guide.voiceSteps.length;
+      setGuidanceIndex(currentIndex);
+      speakGuidance(guide.voiceSteps[currentIndex]);
+    }, 6000);
+
+    return () => {
+      clearInterval(interval);
+      void Speech.stop();
+    };
+  }, [cameraVisible, isVoiceGuidanceEnabled, selectedReason]);
 
   const tapFeedback = () => {
     if (Platform.OS !== "web") void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -206,6 +314,24 @@ export default function HomeScreen() {
       }
     }
     setCameraVisible(true);
+  };
+
+  const handleToggleVoiceGuidance = () => {
+    tapFeedback();
+    setIsVoiceGuidanceEnabled((current) => {
+      const nextValue = !current;
+      if (!nextValue) void Speech.stop();
+      return nextValue;
+    });
+  };
+
+  const handleReplayGuidance = () => {
+    tapFeedback();
+    const guide = getEvidenceGuide(selectedReason);
+    const prompt = guide.voiceSteps[guidanceIndex] || guide.voiceSteps[0];
+    setGuidanceText(prompt);
+    void Speech.stop();
+    Speech.speak(prompt, { language: "pt-BR", rate: 0.92, pitch: 1, volume: 1 });
   };
 
   const handleCapturePhoto = async () => {
@@ -280,7 +406,7 @@ export default function HomeScreen() {
           <View style={styles.cameraOverlay}>
             <CameraView ref={cameraRef} style={styles.cameraView} facing="back" mode="picture" />
             {(() => {
-              const config = reasonEvidenceConfig[selectedReason] || reasonEvidenceConfig.default;
+              const config = getEvidenceGuide(selectedReason);
               return (
                 <View pointerEvents="none" style={styles.cameraGuideLayer}>
                   <View style={styles.cameraTopCopy}>
@@ -295,10 +421,30 @@ export default function HomeScreen() {
                     <View style={[styles.frameCorner, styles.frameBottomRight]} />
                     <View style={styles.frameHint}><MaterialIcons name="camera-alt" size={18} color={colors.background} /><Text style={styles.frameHintText}>{config.frameHint}</Text></View>
                   </View>
-                  <View style={styles.cameraBottomCopy}><MaterialIcons name="wb-sunny" size={18} color={colors.warning} /><Text style={styles.cameraBottomText}>Mantenha a câmera firme para um registro nítido.</Text></View>
+                  <View style={styles.cameraBottomCopy}><MaterialIcons name="wb-sunny" size={18} color={colors.warning} /><Text style={styles.cameraBottomText}>{guidanceText || config.voiceSteps[0]}</Text></View>
                 </View>
               );
             })()}
+            <View style={styles.cameraVoicePanel}>
+              <View style={styles.cameraVoiceStatus}>
+                <View style={[styles.voiceStatusDot, { backgroundColor: isVoiceGuidanceEnabled ? "#22c55e" : "#9ca3af" }]} />
+                <Text style={styles.cameraVoiceLabel}>{isVoiceGuidanceEnabled ? "Orientação por voz ativa" : "Voz desligada"}</Text>
+              </View>
+              <Pressable
+                accessibilityLabel="Repetir orientação da câmera"
+                onPress={handleReplayGuidance}
+                style={({ pressed }) => [styles.cameraVoiceButton, pressed && styles.iconPressed]}
+              >
+                <MaterialIcons name="volume-up" size={18} color={colors.background} />
+              </Pressable>
+              <Pressable
+                accessibilityLabel={isVoiceGuidanceEnabled ? "Desligar orientação por voz" : "Ligar orientação por voz"}
+                onPress={handleToggleVoiceGuidance}
+                style={({ pressed }) => [styles.cameraVoiceButton, pressed && styles.iconPressed]}
+              >
+                <MaterialIcons name={isVoiceGuidanceEnabled ? "volume-off" : "volume-up"} size={18} color={colors.background} />
+              </Pressable>
+            </View>
             <View style={styles.cameraControls}>
               <Pressable onPress={() => setCameraVisible(false)} style={({ pressed }) => [styles.cameraCancelButton, pressed && styles.iconPressed]}><Text style={styles.cameraCancelText}>Cancelar</Text></Pressable>
               <Pressable onPress={handleCapturePhoto} style={({ pressed }) => [styles.shutterButton, pressed && styles.shutterPressed]}><View style={styles.shutterInner} /></Pressable>
@@ -483,7 +629,7 @@ export default function HomeScreen() {
                 </View>
               </Animated.View>
               {(() => {
-                const config = reasonEvidenceConfig[selectedReason] || reasonEvidenceConfig.default;
+                const config = getEvidenceGuide(selectedReason);
                 return (
                   <View>
                     <Text style={styles.screenHeading}>{config.title}</Text>
@@ -664,7 +810,12 @@ const makeStyles = (colors: any) => StyleSheet.create({
   cameraOverlay: { position: "absolute", zIndex: 30, top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "#080808" },
   cameraView: { flex: 1 },
   cameraGuideLayer: { position: "absolute", top: 0, right: 0, bottom: 108, left: 0, justifyContent: "center", alignItems: "center", paddingHorizontal: 24, backgroundColor: "#00000028" },
-  cameraTopCopy: { position: "absolute", top: 48, left: 24, right: 24 },
+  cameraTopCopy: { position: "absolute", top: 48, left: 24, right: 170 },
+  cameraVoicePanel: { position: "absolute", top: 42, right: 20, zIndex: 5, flexDirection: "row", alignItems: "center", gap: 6 },
+  cameraVoiceStatus: { minHeight: 30, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 9, borderRadius: 99, backgroundColor: "#00000088" },
+  voiceStatusDot: { width: 8, height: 8, borderRadius: 4 },
+  cameraVoiceLabel: { color: colors.background, fontSize: 10, fontWeight: "800" },
+  cameraVoiceButton: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center", backgroundColor: colors.primary },
   cameraKicker: { color: colors.warning, fontSize: 10, fontWeight: "900", letterSpacing: 1.4 },
   cameraTitle: { color: colors.background, fontSize: 28, lineHeight: 34, fontWeight: "900", marginTop: 8 },
   cameraSubtitle: { color: "#eeeeee", fontSize: 13, lineHeight: 19, marginTop: 5 },
