@@ -30,3 +30,11 @@
 - [x] Validar visualmente a ordem e o conteúdo dos slides para a diretoria
 
 - [x] Implementar orientação por voz e texto guiada na câmera com instruções contextuais para cada motivo de quebra (ex.: "Encontre o número do imóvel", "Afaste o celular", "Fachada da casa")
+
+- [x] Diagnosticar e corrigir o erro de inicialização do app no Expo após a implementação da orientação por voz
+- [x] Validar novamente o carregamento do app e o fluxo da câmera no Expo Go
+- [ ] Salvar checkpoint da correção do erro do Expo
+``` 
+
+- [x] Refinar a câmera assistida para eliminar falas repetitivas aleatórias, introduzir instruções contextuais inteligentes e corrigir o layout comprimido
+- [ ] Confirmar o comportamento da captura inteligente em aparelho físico com diferentes condições de iluminação

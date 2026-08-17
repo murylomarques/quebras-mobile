@@ -30,6 +30,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 
 type Step = "identification" | "service" | "reason" | "evidence" | "complete";
+type CameraStatus = "loading" | "ready" | "error";
 type Reason = { name: string; available: boolean; detail: string };
 type ServiceAppointment = { id: string; address: string; serviceType: string; schedule: string };
 
@@ -200,6 +201,7 @@ export default function HomeScreen() {
   const [evidenceAdded, setEvidenceAdded] = useState(false);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [cameraVisible, setCameraVisible] = useState(false);
+  const [cameraStatus, setCameraStatus] = useState<CameraStatus>("loading");
   const [isVoiceGuidanceEnabled, setIsVoiceGuidanceEnabled] = useState(true);
   const [guidanceIndex, setGuidanceIndex] = useState(0);
   const [guidanceText, setGuidanceText] = useState("");
@@ -234,32 +236,29 @@ export default function HomeScreen() {
   }, [brandPulse]);
 
   useEffect(() => {
-    if (!cameraVisible || !isVoiceGuidanceEnabled) {
+    if (!cameraVisible || !isVoiceGuidanceEnabled || cameraStatus === "loading") {
       void Speech.stop();
       return;
     }
 
     const guide = getEvidenceGuide(selectedReason);
-    let currentIndex = 0;
-    const speakGuidance = (text: string) => {
-      setGuidanceText(text);
-      void Speech.stop();
-      Speech.speak(text, { language: "pt-BR", rate: 0.92, pitch: 1, volume: 1 });
-    };
+    const prompt = cameraStatus === "error"
+      ? "Não consegui abrir a câmera. Verifique a permissão e confira se a lente não está coberta."
+      : guide.voiceSteps[guidanceIndex] || guide.voiceSteps[0];
 
-    setGuidanceIndex(0);
-    speakGuidance(guide.voiceSteps[currentIndex]);
-    const interval = setInterval(() => {
-      currentIndex = (currentIndex + 1) % guide.voiceSteps.length;
-      setGuidanceIndex(currentIndex);
-      speakGuidance(guide.voiceSteps[currentIndex]);
-    }, 6000);
+    setGuidanceText(prompt);
+    const speakPrompt = async () => {
+      await Speech.stop();
+      if (cameraVisible && isVoiceGuidanceEnabled) {
+        Speech.speak(prompt, { language: "pt-BR", rate: 0.92, pitch: 1, volume: 1 });
+      }
+    };
+    void speakPrompt();
 
     return () => {
-      clearInterval(interval);
       void Speech.stop();
     };
-  }, [cameraVisible, isVoiceGuidanceEnabled, selectedReason]);
+  }, [cameraVisible, cameraStatus, guidanceIndex, isVoiceGuidanceEnabled, selectedReason]);
 
   const tapFeedback = () => {
     if (Platform.OS !== "web") void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -313,7 +312,21 @@ export default function HomeScreen() {
         return;
       }
     }
+    setCameraStatus("loading");
+    setGuidanceIndex(0);
+    setGuidanceText("Preparando a câmera...");
     setCameraVisible(true);
+  };
+
+  const handleCameraReady = () => {
+    setCameraStatus("ready");
+    setGuidanceIndex(0);
+    setGuidanceText("Câmera pronta. Aponte para o local indicado.");
+  };
+
+  const handleCameraMountError = () => {
+    setCameraStatus("error");
+    setGuidanceText("Não foi possível abrir a câmera. Verifique a permissão e descubra a lente.");
   };
 
   const handleToggleVoiceGuidance = () => {
@@ -328,21 +341,41 @@ export default function HomeScreen() {
   const handleReplayGuidance = () => {
     tapFeedback();
     const guide = getEvidenceGuide(selectedReason);
-    const prompt = guide.voiceSteps[guidanceIndex] || guide.voiceSteps[0];
+    const prompt = cameraStatus === "error"
+      ? "A câmera não está disponível. Verifique a permissão e a lente."
+      : guide.voiceSteps[guidanceIndex] || guide.voiceSteps[0];
     setGuidanceText(prompt);
     void Speech.stop();
-    Speech.speak(prompt, { language: "pt-BR", rate: 0.92, pitch: 1, volume: 1 });
+    if (isVoiceGuidanceEnabled) Speech.speak(prompt, { language: "pt-BR", rate: 0.92, pitch: 1, volume: 1 });
+  };
+
+  const handleCameraHelp = () => {
+    tapFeedback();
+    const helpText = cameraStatus === "error"
+      ? "A câmera não está disponível. Abra as configurações, permita o acesso à câmera e tente novamente."
+      : "Se a imagem estiver escura, descubra a lente e afaste o celular do rosto. Depois aproxime-se até encontrar o número ou o ponto da ocorrência.";
+    setGuidanceText(helpText);
+    void Speech.stop();
+    if (isVoiceGuidanceEnabled) Speech.speak(helpText, { language: "pt-BR", rate: 0.92, pitch: 1, volume: 1 });
   };
 
   const handleCapturePhoto = async () => {
-    if (!cameraRef.current) return;
+    if (!cameraRef.current || cameraStatus !== "ready") {
+      handleCameraHelp();
+      return;
+    }
     tapFeedback();
-    const photo = await cameraRef.current.takePictureAsync({ quality: 0.86, skipProcessing: Platform.OS === "android" });
-    if (photo?.uri) {
-      setPhotoUri(photo.uri);
-      setEvidenceAdded(true);
-      setCameraVisible(false);
-      if (Platform.OS !== "web") void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    try {
+      const photo = await cameraRef.current.takePictureAsync({ quality: 0.86, skipProcessing: Platform.OS === "android" });
+      if (photo?.uri) {
+        setPhotoUri(photo.uri);
+        setEvidenceAdded(true);
+        setCameraVisible(false);
+        if (Platform.OS !== "web") void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    } catch {
+      setGuidanceText("Não consegui capturar a foto. Descubra a lente, mantenha o celular firme e tente novamente.");
+      if (isVoiceGuidanceEnabled) Speech.speak("Não consegui capturar a foto. Descubra a lente, mantenha o celular firme e tente novamente.", { language: "pt-BR", rate: 0.92, pitch: 1, volume: 1 });
     }
   };
 
@@ -404,7 +437,14 @@ export default function HomeScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.keyboard}>
         {cameraVisible && (
           <View style={styles.cameraOverlay}>
-            <CameraView ref={cameraRef} style={styles.cameraView} facing="back" mode="picture" />
+            <CameraView
+              ref={cameraRef}
+              style={styles.cameraView}
+              facing="back"
+              mode="picture"
+              onCameraReady={handleCameraReady}
+              onMountError={handleCameraMountError}
+            />
             {(() => {
               const config = getEvidenceGuide(selectedReason);
               return (
@@ -413,6 +453,10 @@ export default function HomeScreen() {
                     <Text style={styles.cameraKicker}>EVIDÊNCIA TÉCNICA • {selectedReason.toUpperCase()}</Text>
                     <Text style={styles.cameraTitle}>{config.cameraTitle}</Text>
                     <Text style={styles.cameraSubtitle}>{config.cameraSubtitle}</Text>
+                    <View style={styles.cameraReadyPill}>
+                      <View style={[styles.cameraReadyDot, { backgroundColor: cameraStatus === "ready" ? "#22c55e" : cameraStatus === "error" ? colors.primary : colors.warning }]} />
+                      <Text style={styles.cameraReadyText}>{cameraStatus === "ready" ? "Câmera pronta" : cameraStatus === "error" ? "Verifique a câmera" : "Abrindo câmera"}</Text>
+                    </View>
                   </View>
                   <View style={styles.documentFrame}>
                     <View style={[styles.frameCorner, styles.frameTopLeft]} />
@@ -428,7 +472,7 @@ export default function HomeScreen() {
             <View style={styles.cameraVoicePanel}>
               <View style={styles.cameraVoiceStatus}>
                 <View style={[styles.voiceStatusDot, { backgroundColor: isVoiceGuidanceEnabled ? "#22c55e" : "#9ca3af" }]} />
-                <Text style={styles.cameraVoiceLabel}>{isVoiceGuidanceEnabled ? "Orientação por voz ativa" : "Voz desligada"}</Text>
+                <Text style={styles.cameraVoiceLabel}>{isVoiceGuidanceEnabled ? "Assistente ativo" : "Voz desligada"}</Text>
               </View>
               <Pressable
                 accessibilityLabel="Repetir orientação da câmera"
@@ -448,7 +492,14 @@ export default function HomeScreen() {
             <View style={styles.cameraControls}>
               <Pressable onPress={() => setCameraVisible(false)} style={({ pressed }) => [styles.cameraCancelButton, pressed && styles.iconPressed]}><Text style={styles.cameraCancelText}>Cancelar</Text></Pressable>
               <Pressable onPress={handleCapturePhoto} style={({ pressed }) => [styles.shutterButton, pressed && styles.shutterPressed]}><View style={styles.shutterInner} /></Pressable>
-              <View style={styles.cameraControlSpacer} />
+              <Pressable
+                accessibilityLabel="Ajuda da câmera"
+                onPress={handleCameraHelp}
+                style={({ pressed }) => [styles.cameraHelpButton, pressed && styles.iconPressed]}
+              >
+                <MaterialIcons name="help-outline" size={20} color={colors.background} />
+                <Text style={styles.cameraHelpText}>Ajuda</Text>
+              </Pressable>
             </View>
           </View>
         )}
@@ -810,16 +861,19 @@ const makeStyles = (colors: any) => StyleSheet.create({
   cameraOverlay: { position: "absolute", zIndex: 30, top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "#080808" },
   cameraView: { flex: 1 },
   cameraGuideLayer: { position: "absolute", top: 0, right: 0, bottom: 108, left: 0, justifyContent: "center", alignItems: "center", paddingHorizontal: 24, backgroundColor: "#00000028" },
-  cameraTopCopy: { position: "absolute", top: 48, left: 24, right: 170 },
-  cameraVoicePanel: { position: "absolute", top: 42, right: 20, zIndex: 5, flexDirection: "row", alignItems: "center", gap: 6 },
+  cameraTopCopy: { position: "absolute", top: 82, left: 24, right: 24 },
+  cameraVoicePanel: { position: "absolute", top: 28, right: 20, zIndex: 5, flexDirection: "row", alignItems: "center", gap: 6 },
   cameraVoiceStatus: { minHeight: 30, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 9, borderRadius: 99, backgroundColor: "#00000088" },
   voiceStatusDot: { width: 8, height: 8, borderRadius: 4 },
   cameraVoiceLabel: { color: colors.background, fontSize: 10, fontWeight: "800" },
   cameraVoiceButton: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center", backgroundColor: colors.primary },
   cameraKicker: { color: colors.warning, fontSize: 10, fontWeight: "900", letterSpacing: 1.4 },
-  cameraTitle: { color: colors.background, fontSize: 28, lineHeight: 34, fontWeight: "900", marginTop: 8 },
-  cameraSubtitle: { color: "#eeeeee", fontSize: 13, lineHeight: 19, marginTop: 5 },
-  documentFrame: { width: "100%", height: 250, borderRadius: 14, position: "relative", borderWidth: 1, borderColor: "#ffffff55", backgroundColor: "#ffffff08" },
+  cameraTitle: { color: colors.background, fontSize: 25, lineHeight: 30, fontWeight: "900", marginTop: 8 },
+  cameraSubtitle: { color: "#eeeeee", fontSize: 14, lineHeight: 20, marginTop: 6, maxWidth: 350 },
+  cameraReadyPill: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 7, marginTop: 12, paddingVertical: 6, paddingHorizontal: 10, borderRadius: 99, backgroundColor: "#00000066" },
+  cameraReadyDot: { width: 8, height: 8, borderRadius: 4 },
+  cameraReadyText: { color: colors.background, fontSize: 11, fontWeight: "800" },
+  documentFrame: { width: "100%", height: 292, borderRadius: 16, position: "relative", borderWidth: 1, borderColor: "#ffffff88", backgroundColor: "#ffffff08" },
   frameCorner: { position: "absolute", width: 34, height: 34, borderColor: colors.warning },
   frameTopLeft: { top: -2, left: -2, borderTopWidth: 4, borderLeftWidth: 4, borderTopLeftRadius: 12 },
   frameTopRight: { top: -2, right: -2, borderTopWidth: 4, borderRightWidth: 4, borderTopRightRadius: 12 },
@@ -829,10 +883,11 @@ const makeStyles = (colors: any) => StyleSheet.create({
   frameHintText: { color: colors.background, fontSize: 12, fontWeight: "800" },
   cameraBottomCopy: { position: "absolute", bottom: 20, left: 24, right: 24, flexDirection: "row", alignItems: "center", gap: 8 },
   cameraBottomText: { flex: 1, color: "#eeeeee", fontSize: 12, lineHeight: 17 },
-  cameraControls: { height: 108, position: "absolute", left: 0, right: 0, bottom: 0, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 26, backgroundColor: "#080808" },
+  cameraControls: { height: 118, position: "absolute", left: 0, right: 0, bottom: 0, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 24, backgroundColor: "#080808" },
   cameraCancelButton: { minWidth: 76, paddingVertical: 12 },
   cameraCancelText: { color: colors.background, fontSize: 14, fontWeight: "800" },
-  cameraControlSpacer: { width: 76 },
+  cameraHelpButton: { minWidth: 76, flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 5, paddingVertical: 12 },
+  cameraHelpText: { color: colors.background, fontSize: 13, fontWeight: "800" },
   shutterButton: { width: 72, height: 72, borderRadius: 36, borderWidth: 4, borderColor: colors.background, alignItems: "center", justifyContent: "center" },
   shutterInner: { width: 58, height: 58, borderRadius: 29, backgroundColor: colors.warning },
   shutterPressed: { transform: [{ scale: 0.9 }], opacity: 0.85 },
