@@ -216,6 +216,7 @@ export default function HomeScreen() {
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const submitBreakAudit = trpc.breaks.submit.useMutation();
   const cameraRef = useRef<CameraView>(null);
+  const capturedPhotoRef = useRef<any>(null);
   const filteredServices = useMemo(
     () => technicianServices.filter((service) => `${service.id} ${service.address} ${service.serviceType}`.toLowerCase().includes(serviceSearch.toLowerCase().trim())),
     [serviceSearch],
@@ -401,11 +402,12 @@ export default function HomeScreen() {
     }
     tapFeedback();
     try {
-      const photo = await cameraRef.current.takePictureAsync({ quality: 0.86, skipProcessing: Platform.OS === "android" });
+      const photo = await cameraRef.current.takePictureAsync({ quality: 0.86, skipProcessing: Platform.OS === "android", base64: false });
       if (photo?.uri) {
         setPhotoUri(photo.uri);
         setEvidenceAdded(true);
         setCameraVisible(false);
+        capturedPhotoRef.current = photo;
         if (Platform.OS !== "web") void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     } catch {
@@ -448,6 +450,14 @@ export default function HomeScreen() {
         evidenceUrl = "demo://evidence";
       }
 
+      let imageWidth: number | undefined;
+      let imageHeight: number | undefined;
+      const lastPhoto = capturedPhotoRef.current;
+      if (lastPhoto?.width && lastPhoto?.height) {
+        imageWidth = lastPhoto.width;
+        imageHeight = lastPhoto.height;
+      }
+
       const response = await submitBreakAudit.mutateAsync({
         serviceAppointmentId: selectedService.id,
         technicianCsso: username.trim(),
@@ -458,6 +468,9 @@ export default function HomeScreen() {
         latitude: location ? String(location.latitude) : undefined,
         longitude: location ? String(location.longitude) : undefined,
         capturedAt: location?.capturedAt ?? new Date().toISOString(),
+        imageWidth,
+        imageHeight,
+        imageOrientation: lastPhoto?.width && lastPhoto?.height ? (lastPhoto.width > lastPhoto.height ? "landscape" : "portrait") : undefined,
       });
 
       setAuditId(String(response.auditId));

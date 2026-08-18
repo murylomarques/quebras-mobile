@@ -95,8 +95,8 @@ export async function getUserByOpenId(openId: string) {
 export async function createBreakAudit(data: InsertBreakAudit) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  const result = await db.insert(breakAudits).values(data);
-  return result[0].insertId;
+  await db.insert(breakAudits).values(data);
+  return data.id;
 }
 
 export async function getBreakAuditsByCsso(technicianCsso: string) {

@@ -49,3 +49,6 @@
 - [x] Diagnosticar o erro "Unable to transform response from server" ao enviar a evidência
 - [x] Corrigir a comunicação do app com o endpoint de auditoria e o upload da foto
 - [x] Validar o envio completo e gerar novo QR Code após a correção
+
+- [x] Adicionar suporte a UUIDv7 e extração de metadados da imagem na auditoria de quebras
+- [x] Atualizar schema Drizzle, migration, endpoint e cliente mobile para coletar e salvar EXIF e UUIDv7

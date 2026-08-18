@@ -28,7 +28,7 @@ export type InsertUser = typeof users.$inferInsert;
 // TODO: Add your tables here
 
 export const breakAudits = mysqlTable("break_audits", {
-  id: int("id").autoincrement().primaryKey(),
+  id: varchar("id", { length: 36 }).primaryKey(),
   serviceAppointmentId: varchar("serviceAppointmentId", { length: 64 }).notNull(),
   technicianCsso: varchar("technicianCsso", { length: 64 }).notNull(),
   reason: varchar("reason", { length: 255 }).notNull(),
@@ -37,6 +37,12 @@ export const breakAudits = mysqlTable("break_audits", {
   latitude: varchar("latitude", { length: 64 }),
   longitude: varchar("longitude", { length: 64 }),
   capturedAt: varchar("capturedAt", { length: 64 }),
+  imageWidth: int("imageWidth"),
+  imageHeight: int("imageHeight"),
+  imageOrientation: varchar("imageOrientation", { length: 32 }),
+  exifTimestamp: varchar("exifTimestamp", { length: 64 }),
+  exifGpsLat: varchar("exifGpsLat", { length: 64 }),
+  exifGpsLng: varchar("exifGpsLng", { length: 64 }),
   status: varchar("status", { length: 32 }).default("completed").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });

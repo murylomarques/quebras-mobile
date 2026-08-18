@@ -15,6 +15,13 @@
       "when": 1787048220191,
       "tag": "0001_aberrant_manta",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1787050102362,
+      "tag": "0002_grey_zeigeist",
+      "breakpoints": true
     }
   ]
 }

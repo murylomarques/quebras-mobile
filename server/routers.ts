@@ -34,6 +34,12 @@ export const appRouter = router({
           latitude: z.string().optional(),
           longitude: z.string().optional(),
           capturedAt: z.string().optional(),
+          imageWidth: z.number().optional(),
+          imageHeight: z.number().optional(),
+          imageOrientation: z.string().optional(),
+          exifTimestamp: z.string().optional(),
+          exifGpsLat: z.string().optional(),
+          exifGpsLng: z.string().optional(),
         })
       )
       .mutation(async ({ input }) => {
@@ -54,7 +60,20 @@ export const appRouter = router({
             )
           : { key: null, url: input.evidenceUrl as string };
 
-        const auditId = await db.createBreakAudit({
+        const generateUuidV7 = () => {
+          const now = Date.now();
+          const timeHex = now.toString(16).padStart(12, '0');
+          const randHex1 = Math.floor(Math.random() * 0xffff).toString(16).padStart(4, '0');
+          const randHex2 = (Math.floor(Math.random() * 0x3fff) | 0x8000).toString(16).padStart(4, '0');
+          const randHex3 = Math.floor(Math.random() * 0xffffffff).toString(16).padStart(8, '0');
+          const randHex4 = Math.floor(Math.random() * 0xffff).toString(16).padStart(4, '0');
+          return `${timeHex.slice(0, 8)}-${timeHex.slice(8, 12)}-7${randHex1.slice(1)}-${randHex2}-${randHex3}${randHex4}`;
+        };
+
+        const auditId = generateUuidV7();
+
+        const auditIdResult = await db.createBreakAudit({
+          id: auditId,
           serviceAppointmentId: input.serviceAppointmentId,
           technicianCsso: input.technicianCsso,
           reason: input.reason,
@@ -63,6 +82,12 @@ export const appRouter = router({
           latitude: input.latitude || null,
           longitude: input.longitude || null,
           capturedAt: input.capturedAt || new Date().toISOString(),
+          imageWidth: input.imageWidth ?? null,
+          imageHeight: input.imageHeight ?? null,
+          imageOrientation: input.imageOrientation || null,
+          exifTimestamp: input.exifTimestamp || null,
+          exifGpsLat: input.exifGpsLat || null,
+          exifGpsLng: input.exifGpsLng || null,
           status: "completed",
         });
 
