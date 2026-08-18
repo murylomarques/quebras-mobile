@@ -64,4 +64,4 @@
 
 - [x] Redesenhar a tela bloqueante de envio com visual DESKTOP moderno, etapas de progresso e estado de sucesso
 - [x] Validar a nova animação de envio em TypeScript, lint e preview web
-- [ ] Salvar checkpoint da melhoria visual da tela de envio
+- [x] Salvar checkpoint da melhoria visual da tela de envio
