@@ -22,6 +22,18 @@ export const appRouter = router({
   }),
 
   breaks: router({
+    listByCsso: publicProcedure
+      .input(z.object({ technicianCsso: z.string().min(1) }))
+      .query(async ({ input }) => {
+        const audits = await db.getBreakAuditsByCsso(input.technicianCsso);
+        return audits.map((audit) => ({
+          serviceAppointmentId: audit.serviceAppointmentId,
+          auditId: audit.id,
+          status: audit.status,
+          reason: audit.reason,
+          capturedAt: audit.capturedAt,
+        }));
+      }),
     submit: publicProcedure
       .input(
         z.object({
@@ -45,7 +57,11 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const existingAudit = await db.getBreakAuditByServiceAppointmentId(input.serviceAppointmentId);
         if (existingAudit) {
-          throw new Error("Esta SA já foi concluída e possui uma auditoria registrada.");
+          return {
+            success: true,
+            auditId: existingAudit.id,
+            message: "Esta SA já estava concluída e auditada anteriormente.",
+          };
         }
 
         if (!input.evidenceBase64 && !input.evidenceUrl) {

@@ -52,3 +52,7 @@
 
 - [x] Adicionar suporte a UUIDv7 e extração de metadados da imagem na auditoria de quebras
 - [x] Atualizar schema Drizzle, migration, endpoint e cliente mobile para coletar e salvar EXIF e UUIDv7
+
+- [x] Ajustar tabela break_audits para alinhar colunas de metadados de imagem e ID UUIDv7
+- [x] Tornar o endpoint submit idempotente (retornar sucesso se a SA já estiver auditada)
+- [x] Criar tela de envio bloqueante com animação e indicador "Enviando dados... só um minuto"

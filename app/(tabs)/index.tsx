@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  BackHandler,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -24,6 +25,7 @@ import Animated, {
   FadeInDown,
   useAnimatedStyle,
   useSharedValue,
+  withRepeat,
   withSequence,
   withTiming,
 } from "react-native-reanimated";
@@ -215,6 +217,10 @@ export default function HomeScreen() {
   const [auditId, setAuditId] = useState<string | null>(null);
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const submitBreakAudit = trpc.breaks.submit.useMutation();
+  const existingAuditsQuery = trpc.breaks.listByCsso.useQuery(
+    { technicianCsso: username.trim() },
+    { enabled: step === "service" && username.trim().length > 0, staleTime: 0 },
+  );
   const cameraRef = useRef<CameraView>(null);
   const capturedPhotoRef = useRef<any>(null);
   const filteredServices = useMemo(
@@ -224,6 +230,7 @@ export default function HomeScreen() {
 
   const screenProgress = useSharedValue(1);
   const brandPulse = useSharedValue(0);
+  const submitSpin = useSharedValue(0);
   const screenAnimatedStyle = useAnimatedStyle(() => ({
     opacity: screenProgress.value,
     transform: [{ translateY: (1 - screenProgress.value) * 16 }],
@@ -231,11 +238,42 @@ export default function HomeScreen() {
   const brandAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: 1 + brandPulse.value * 0.035 }],
   }));
+  const submitSpinStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${submitSpin.value}deg` }],
+  }));
 
   useEffect(() => {
     screenProgress.value = 0;
     screenProgress.value = withTiming(1, { duration: 320, easing: Easing.out(Easing.cubic) });
   }, [screenProgress, step]);
+
+  useEffect(() => {
+    if (isSubmitting) {
+      submitSpin.value = 0;
+      submitSpin.value = withRepeat(withTiming(360, { duration: 1200, easing: Easing.linear }), -1, false);
+    } else {
+      submitSpin.value = 0;
+    }
+    return () => {
+      submitSpin.value = 0;
+    };
+  }, [isSubmitting, submitSpin]);
+
+  useEffect(() => {
+    if (!existingAuditsQuery.data) return;
+    const syncedIds = existingAuditsQuery.data
+      .filter((audit) => audit.status === "completed")
+      .map((audit) => audit.serviceAppointmentId);
+    if (syncedIds.length > 0) {
+      setCompletedServiceIds((current) => [...new Set([...current, ...syncedIds])]);
+    }
+  }, [existingAuditsQuery.data]);
+
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+    const subscription = BackHandler.addEventListener("hardwareBackPress", () => isSubmitting);
+    return () => subscription.remove();
+  }, [isSubmitting]);
 
   useEffect(() => {
     brandPulse.value = withSequence(
@@ -274,6 +312,7 @@ export default function HomeScreen() {
   };
 
   const goBack = () => {
+    if (isSubmitting) return;
     tapFeedback();
     if (step === "service") setStep("identification");
     if (step === "reason") setStep("service");
@@ -291,10 +330,7 @@ export default function HomeScreen() {
   };
 
   const handleServiceSelection = (service: ServiceAppointment) => {
-    if (completedServiceIds.includes(service.id)) {
-      Alert.alert("SA já concluída", "Esta SA já possui uma quebra registrada e auditada.");
-      return;
-    }
+    if (completedServiceIds.includes(service.id)) return;
     tapFeedback();
     setSelectedService(service);
     setStep("reason");
@@ -427,10 +463,7 @@ export default function HomeScreen() {
       Alert.alert("Evidência necessária", "Adicione a evidência solicitada antes de registrar.");
       return;
     }
-    if (completedServiceIds.includes(selectedService.id)) {
-      Alert.alert("SA já concluída", "Esta SA já possui uma quebra registrada e auditada.");
-      return;
-    }
+    if (isSubmitting) return;
 
     tapFeedback();
     setIsSubmitting(true);
@@ -501,10 +534,11 @@ export default function HomeScreen() {
     <View style={styles.topBar}>
       <View style={styles.topBrandRow}>
         {step !== "identification" && step !== "complete" ? (
-          <Pressable
+              <Pressable
             accessibilityLabel="Voltar"
+            disabled={isSubmitting}
             onPress={goBack}
-            style={({ pressed }) => [styles.backPressable, pressed && styles.iconPressed]}
+            style={({ pressed }) => [styles.backPressable, isSubmitting && styles.disabledBackPressable, pressed && styles.iconPressed]}
           >
             <MaterialIcons name="arrow-back" size={22} color={colors.foreground} />
           </Pressable>
@@ -835,6 +869,29 @@ export default function HomeScreen() {
             </ScrollView>
           )}
         </Animated.View>
+        {isSubmitting && (
+          <View style={styles.submissionOverlay} pointerEvents="auto">
+            <Animated.View entering={FadeInDown.duration(240)} style={styles.submissionPanel}>
+              <Animated.View style={[styles.submissionSpinner, submitSpinStyle]}>
+                <View style={styles.submissionSpinnerCore}>
+                  <MaterialIcons name="cloud-upload" size={30} color={colors.background} />
+                </View>
+              </Animated.View>
+              <Text style={styles.submissionKicker}>DESKTOP • AUDITORIA</Text>
+              <Text style={styles.submissionTitle}>Enviando dados...</Text>
+              <Text style={styles.submissionText}>Só um minuto. Estamos salvando a evidência, o GPS e o registro da SA.</Text>
+              <View style={styles.submissionProgressRow}>
+                <View style={styles.submissionProgressDot}><MaterialIcons name="check" size={13} color={colors.background} /></View>
+                <Text style={styles.submissionProgressText}>Evidência preparada</Text>
+              </View>
+              <View style={styles.submissionProgressRow}>
+                <ActivityIndicator size="small" color={colors.primary} />
+                <Text style={styles.submissionProgressText}>Registrando no backend</Text>
+              </View>
+              <Text style={styles.submissionFooter}>Não feche esta tela durante o envio.</Text>
+            </Animated.View>
+          </View>
+        )}
       </KeyboardAvoidingView>
     </ScreenContainer>
   );
@@ -853,6 +910,7 @@ const makeStyles = (colors: any) => StyleSheet.create({
   progressTrack: { flex: 1, height: 5, borderRadius: 99, backgroundColor: colors.border, marginLeft: 16, overflow: "hidden" },
   progressFill: { height: "100%", backgroundColor: colors.primary, borderRadius: 99 },
   backPressable: { padding: 6, marginRight: 11, marginLeft: -6 },
+  disabledBackPressable: { opacity: 0.3 },
   iconPressed: { opacity: 0.55 },
   identificationContent: { flexGrow: 1, paddingBottom: 26 },
   heroBackdrop: { minHeight: 300, backgroundColor: colors.accent, paddingHorizontal: 24, paddingTop: 28, paddingBottom: 30, overflow: "hidden" },
@@ -945,6 +1003,17 @@ const makeStyles = (colors: any) => StyleSheet.create({
   evidenceAddedTitle: { color: colors.success, fontSize: 13, fontWeight: "900" },
   evidenceAddedText: { color: colors.muted, fontSize: 11, marginTop: 3 },
   retakeButton: { width: 36, height: 36, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: colors.primary + "16" },
+  submissionOverlay: { position: "absolute", zIndex: 100, top: 0, right: 0, bottom: 0, left: 0, alignItems: "center", justifyContent: "center", padding: 22, backgroundColor: "#00000099" },
+  submissionPanel: { width: "100%", maxWidth: 360, alignItems: "center", padding: 28, borderRadius: 28, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, shadowColor: colors.accent, shadowOpacity: 0.3, shadowRadius: 24, shadowOffset: { width: 0, height: 12 }, elevation: 10 },
+  submissionSpinner: { width: 82, height: 82, alignItems: "center", justifyContent: "center", borderRadius: 41, borderWidth: 4, borderColor: colors.warning, borderTopColor: colors.primary, marginBottom: 20 },
+  submissionSpinnerCore: { width: 54, height: 54, alignItems: "center", justifyContent: "center", borderRadius: 27, backgroundColor: colors.primary },
+  submissionKicker: { color: colors.primary, fontSize: 10, fontWeight: "900", letterSpacing: 1.7 },
+  submissionTitle: { color: colors.foreground, fontSize: 27, lineHeight: 33, fontWeight: "900", marginTop: 8, textAlign: "center" },
+  submissionText: { color: colors.muted, fontSize: 14, lineHeight: 21, marginTop: 10, textAlign: "center" },
+  submissionProgressRow: { width: "100%", flexDirection: "row", alignItems: "center", gap: 10, marginTop: 18 },
+  submissionProgressDot: { width: 22, height: 22, alignItems: "center", justifyContent: "center", borderRadius: 11, backgroundColor: colors.success },
+  submissionProgressText: { flex: 1, color: colors.foreground, fontSize: 13, fontWeight: "700" },
+  submissionFooter: { color: colors.muted, fontSize: 11, fontWeight: "700", textAlign: "center", marginTop: 24 },
   completeContent: { flexGrow: 1, alignItems: "center", justifyContent: "center", padding: 22 },
   completeIcon: { width: 92, height: 92, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.primary, marginBottom: 22, shadowColor: colors.primary, shadowOpacity: 0.3, shadowRadius: 15, shadowOffset: { width: 0, height: 8 }, elevation: 4 },
   completeKicker: { color: colors.primary, fontSize: 10, fontWeight: "900", letterSpacing: 1.5, textAlign: "center" },
