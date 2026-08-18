@@ -45,3 +45,7 @@
 - [x] Corrigir a configuração do Metro/NativeWind e validar bundles web e Android
 - [ ] Confirmar o envio real de uma foto e GPS em aparelho físico conectado ao backend
 - [x] Salvar checkpoint da integração de auditoria
+
+- [x] Diagnosticar o erro "Unable to transform response from server" ao enviar a evidência
+- [x] Corrigir a comunicação do app com o endpoint de auditoria e o upload da foto
+- [x] Validar o envio completo e gerar novo QR Code após a correção

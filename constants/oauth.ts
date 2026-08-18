@@ -1,5 +1,6 @@
 import * as Linking from "expo-linking";
 import * as ReactNative from "react-native";
+import Constants from "expo-constants";
 
 // Extract scheme from bundle ID (last segment timestamp, prefixed with "manus")
 // e.g., "space.manus.my.app.t20240115103045" -> "manus20240115103045"
@@ -35,17 +36,35 @@ export function getApiBaseUrl(): string {
     return API_BASE_URL.replace(/\/$/, "");
   }
 
-  // On web, derive from current hostname by replacing port 8081 with 3000
+  // On web, derive from current hostname by replacing the public Metro port prefix.
   if (ReactNative.Platform.OS === "web" && typeof window !== "undefined" && window.location) {
     const { protocol, hostname } = window.location;
-    // Pattern: 8081-sandboxid.region.domain -> 3000-sandboxid.region.domain
     const apiHostname = hostname.replace(/^8081-/, "3000-");
     if (apiHostname !== hostname) {
       return `${protocol}//${apiHostname}`;
     }
   }
 
-  // Fallback to empty (will use relative URL)
+  // On iOS/Android in Expo Go, there is no window. Expo exposes the host used
+  // by the QR code through expoConfig.hostUri. Convert the public Metro host
+  // (8081-...) to the matching public API host (3000-...).
+  const hostUri = Constants.expoConfig?.hostUri;
+  if (hostUri) {
+    const normalizedUri = hostUri.includes("://") ? hostUri : `http://${hostUri}`;
+    try {
+      const parsed = new URL(normalizedUri);
+      if (parsed.hostname.startsWith("8081-")) {
+        return `${parsed.protocol === "https:" ? "https" : "https"}://${parsed.hostname.replace(/^8081-/, "3000-")}`;
+      }
+      if (parsed.port === "8081") {
+        return `${parsed.protocol}//${parsed.hostname}:3000`;
+      }
+    } catch {
+      // Fall through to the relative URL only when Expo has no usable host.
+    }
+  }
+
+  // Keep relative URLs as a final fallback for web deployments with a reverse proxy.
   return "";
 }
 
