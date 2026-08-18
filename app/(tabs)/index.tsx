@@ -39,6 +39,15 @@ type CameraStatus = "loading" | "ready" | "error";
 type GpsSnapshot = { latitude: number; longitude: number; accuracy: number | null; capturedAt: string };
 type Reason = { name: string; available: boolean; detail: string };
 type ServiceAppointment = { id: string; address: string; serviceType: string; schedule: string };
+type SubmissionStage = 0 | 1 | 2 | 3 | 4;
+
+const submissionStages: { label: string; icon: keyof typeof MaterialIcons.glyphMap }[] = [
+  { label: "Evidência preparada", icon: "photo-camera" },
+  { label: "GPS validado", icon: "location-on" },
+  { label: "Foto e dados enviados", icon: "cloud-upload" },
+  { label: "Auditoria registrada", icon: "fact-check" },
+  { label: "SA concluída", icon: "check-circle" },
+];
 
 const reasons: Reason[] = [
   // Motivos liberados: aparecem primeiro para agilizar a operação em campo.
@@ -215,6 +224,7 @@ export default function HomeScreen() {
   const [guidanceIndex, setGuidanceIndex] = useState(0);
   const [guidanceText, setGuidanceText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionStage, setSubmissionStage] = useState<SubmissionStage>(0);
   const [completedServiceIds, setCompletedServiceIds] = useState<string[]>([]);
   const [gpsSnapshot, setGpsSnapshot] = useState<GpsSnapshot | null>(null);
   const [auditId, setAuditId] = useState<string | null>(null);
@@ -234,6 +244,8 @@ export default function HomeScreen() {
   const screenProgress = useSharedValue(1);
   const brandPulse = useSharedValue(0);
   const submitSpin = useSharedValue(0);
+  const submissionPulse = useSharedValue(0);
+  const submissionProgress = useSharedValue(0);
   const screenAnimatedStyle = useAnimatedStyle(() => ({
     opacity: screenProgress.value,
     transform: [{ translateY: (1 - screenProgress.value) * 16 }],
@@ -244,6 +256,13 @@ export default function HomeScreen() {
   const submitSpinStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${submitSpin.value}deg` }],
   }));
+  const submissionPulseStyle = useAnimatedStyle(() => ({
+    opacity: 0.82 + submissionPulse.value * 0.18,
+    transform: [{ scale: 1 + submissionPulse.value * 0.045 }],
+  }));
+  const submissionProgressStyle = useAnimatedStyle(() => ({
+    width: `${Math.max(submissionProgress.value, 0.06) * 100}%`,
+  }));
 
   useEffect(() => {
     screenProgress.value = 0;
@@ -253,14 +272,31 @@ export default function HomeScreen() {
   useEffect(() => {
     if (isSubmitting) {
       submitSpin.value = 0;
-      submitSpin.value = withRepeat(withTiming(360, { duration: 1200, easing: Easing.linear }), -1, false);
+      submitSpin.value = withRepeat(withTiming(360, { duration: 1500, easing: Easing.linear }), -1, false);
+      submissionPulse.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 900, easing: Easing.inOut(Easing.quad) }),
+          withTiming(0, { duration: 900, easing: Easing.inOut(Easing.quad) }),
+        ),
+        -1,
+        false,
+      );
     } else {
       submitSpin.value = 0;
+      submissionPulse.value = 0;
     }
     return () => {
       submitSpin.value = 0;
+      submissionPulse.value = 0;
     };
-  }, [isSubmitting, submitSpin]);
+  }, [isSubmitting, submitSpin, submissionPulse]);
+
+  useEffect(() => {
+    submissionProgress.value = withTiming(isSubmitting ? (submissionStage + 1) / submissionStages.length : 0, {
+      duration: 360,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [isSubmitting, submissionProgress, submissionStage]);
 
   useEffect(() => {
     if (!existingAuditsQuery.data) return;
@@ -469,9 +505,11 @@ export default function HomeScreen() {
     if (isSubmitting) return;
 
     tapFeedback();
+    setSubmissionStage(0);
     setIsSubmitting(true);
     try {
       const location = gpsSnapshot ?? (await captureGpsSnapshot());
+      setSubmissionStage(1);
       if (Platform.OS !== "web" && !location) {
         throw new Error("Não foi possível obter a localização. Ative o GPS e permita o acesso à localização para continuar.");
       }
@@ -486,6 +524,8 @@ export default function HomeScreen() {
         evidenceUrl = "demo://evidence";
       }
 
+      setSubmissionStage(2);
+
       let imageWidth: number | undefined;
       let imageHeight: number | undefined;
       const lastPhoto = capturedPhotoRef.current;
@@ -494,6 +534,7 @@ export default function HomeScreen() {
         imageHeight = lastPhoto.height;
       }
 
+      setSubmissionStage(3);
       const response = await submitBreakAudit.mutateAsync({
         serviceAppointmentId: selectedService.id,
         technicianCsso: username.trim(),
@@ -509,6 +550,8 @@ export default function HomeScreen() {
         imageOrientation: lastPhoto?.width && lastPhoto?.height ? (lastPhoto.width > lastPhoto.height ? "landscape" : "portrait") : undefined,
       });
 
+      setSubmissionStage(4);
+      await new Promise((resolve) => setTimeout(resolve, 650));
       setAuditId(String(response.auditId));
       setCompletedServiceIds((current) => [...new Set([...current, selectedService.id])]);
       setIsSubmitting(false);
@@ -874,22 +917,61 @@ export default function HomeScreen() {
         </Animated.View>
         {isSubmitting && (
           <View style={styles.submissionOverlay} pointerEvents="auto">
-            <Animated.View entering={FadeInDown.duration(240)} style={styles.submissionPanel}>
-              <Animated.View style={[styles.submissionSpinner, submitSpinStyle]}>
-                <View style={styles.submissionSpinnerCore}>
-                  <MaterialIcons name="cloud-upload" size={30} color={colors.background} />
+            <View style={styles.submissionBackdropOrbLarge} />
+            <View style={styles.submissionBackdropOrbSmall} />
+            <Animated.View entering={FadeInDown.duration(280)} style={styles.submissionPanel}>
+              <View style={styles.submissionBrandRow}>
+                <View style={styles.submissionBrandMark}>
+                  <Text style={styles.submissionBrandMarkText}>D</Text>
+                  <View style={styles.submissionBrandSlash} />
+                </View>
+                <View>
+                  <Text style={styles.submissionBrandName}>DESKTOP</Text>
+                  <Text style={styles.submissionBrandDescriptor}>OPERAÇÃO EM CAMPO</Text>
+                </View>
+                <View style={styles.submissionSecureBadge}>
+                  <MaterialIcons name="lock" size={13} color="#f4ba44" />
+                  <Text style={styles.submissionSecureText}>SEGURO</Text>
+                </View>
+              </View>
+
+              <Animated.View style={[styles.submissionOrb, submissionPulseStyle]}>
+                <Animated.View style={[styles.submissionOrbit, submitSpinStyle]} />
+                <View style={styles.submissionOrbCore}>
+                  <MaterialIcons name={submissionStage === 4 ? "check" : "cloud-upload"} size={31} color="#ffffff" />
                 </View>
               </Animated.View>
+
               <Text style={styles.submissionKicker}>DESKTOP • AUDITORIA</Text>
-              <Text style={styles.submissionTitle}>Enviando dados...</Text>
-              <Text style={styles.submissionText}>Só um minuto. Estamos salvando a evidência, o GPS e o registro da SA.</Text>
-              <View style={styles.submissionProgressRow}>
-                <View style={styles.submissionProgressDot}><MaterialIcons name="check" size={13} color={colors.background} /></View>
-                <Text style={styles.submissionProgressText}>Evidência preparada</Text>
+              <Animated.Text key={submissionStage} entering={FadeInDown.duration(220)} style={styles.submissionTitle}>
+                {submissionStage === 4 ? "Registro concluído" : "Enviando dados"}
+              </Animated.Text>
+              <Text style={styles.submissionText}>
+                {submissionStage === 4 ? "A SA foi registrada com evidência, GPS e protocolo de auditoria." : "Só um minuto. Estamos salvando a evidência, o GPS e o registro da SA."}
+              </Text>
+
+              <View style={styles.submissionProgressTrack}>
+                <Animated.View style={[styles.submissionProgressFill, submissionProgressStyle]} />
               </View>
-              <View style={styles.submissionProgressRow}>
-                <ActivityIndicator size="small" color={colors.primary} />
-                <Text style={styles.submissionProgressText}>Registrando no backend</Text>
+              <View style={styles.submissionStepCounterRow}>
+                <Text style={styles.submissionStepCounter}>ETAPA {submissionStage + 1} DE {submissionStages.length}</Text>
+                <Text style={styles.submissionStepCurrent}>{submissionStages[submissionStage].label}</Text>
+              </View>
+
+              <View style={styles.submissionStepsList}>
+                {submissionStages.map((stageItem, index) => {
+                  const isDone = index < submissionStage || submissionStage === 4 && index === 4;
+                  const isCurrent = index === submissionStage && submissionStage !== 4;
+                  return (
+                    <View key={stageItem.label} style={styles.submissionProgressRow}>
+                      <View style={[styles.submissionProgressDot, isDone && styles.submissionProgressDotDone, isCurrent && styles.submissionProgressDotCurrent]}>
+                        <MaterialIcons name={isDone ? "check" : stageItem.icon} size={13} color={isDone || isCurrent ? "#ffffff" : colors.muted} />
+                      </View>
+                      <Text style={[styles.submissionProgressText, !isDone && !isCurrent && styles.submissionProgressTextMuted]}>{stageItem.label}</Text>
+                      {isCurrent ? <ActivityIndicator size="small" color="#f4ba44" /> : isDone ? <MaterialIcons name="done" size={16} color="#16a34a" /> : null}
+                    </View>
+                  );
+                })}
               </View>
               <Text style={styles.submissionFooter}>Não feche esta tela durante o envio.</Text>
             </Animated.View>
@@ -1006,17 +1088,37 @@ const makeStyles = (colors: any) => StyleSheet.create({
   evidenceAddedTitle: { color: colors.success, fontSize: 13, fontWeight: "900" },
   evidenceAddedText: { color: colors.muted, fontSize: 11, marginTop: 3 },
   retakeButton: { width: 36, height: 36, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: colors.primary + "16" },
-  submissionOverlay: { position: "absolute", zIndex: 100, top: 0, right: 0, bottom: 0, left: 0, alignItems: "center", justifyContent: "center", padding: 22, backgroundColor: "#00000099" },
-  submissionPanel: { width: "100%", maxWidth: 360, alignItems: "center", padding: 28, borderRadius: 28, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, shadowColor: colors.accent, shadowOpacity: 0.3, shadowRadius: 24, shadowOffset: { width: 0, height: 12 }, elevation: 10 },
-  submissionSpinner: { width: 82, height: 82, alignItems: "center", justifyContent: "center", borderRadius: 41, borderWidth: 4, borderColor: colors.warning, borderTopColor: colors.primary, marginBottom: 20 },
-  submissionSpinnerCore: { width: 54, height: 54, alignItems: "center", justifyContent: "center", borderRadius: 27, backgroundColor: colors.primary },
-  submissionKicker: { color: colors.primary, fontSize: 10, fontWeight: "900", letterSpacing: 1.7 },
-  submissionTitle: { color: colors.foreground, fontSize: 27, lineHeight: 33, fontWeight: "900", marginTop: 8, textAlign: "center" },
-  submissionText: { color: colors.muted, fontSize: 14, lineHeight: 21, marginTop: 10, textAlign: "center" },
-  submissionProgressRow: { width: "100%", flexDirection: "row", alignItems: "center", gap: 10, marginTop: 18 },
-  submissionProgressDot: { width: 22, height: 22, alignItems: "center", justifyContent: "center", borderRadius: 11, backgroundColor: colors.success },
-  submissionProgressText: { flex: 1, color: colors.foreground, fontSize: 13, fontWeight: "700" },
-  submissionFooter: { color: colors.muted, fontSize: 11, fontWeight: "700", textAlign: "center", marginTop: 24 },
+  submissionOverlay: { position: "absolute", zIndex: 100, top: 0, right: 0, bottom: 0, left: 0, alignItems: "center", justifyContent: "center", padding: 18, backgroundColor: "#240909" },
+  submissionBackdropOrbLarge: { position: "absolute", width: 320, height: 320, borderRadius: 160, right: -145, top: -105, backgroundColor: "#ae2e2a", opacity: 0.3 },
+  submissionBackdropOrbSmall: { position: "absolute", width: 190, height: 190, borderRadius: 95, left: -105, bottom: -70, backgroundColor: "#f4ba44", opacity: 0.12 },
+  submissionPanel: { width: "100%", maxWidth: 380, alignItems: "center", paddingHorizontal: 23, paddingTop: 21, paddingBottom: 19, borderRadius: 26, backgroundColor: "#fffdfb", borderWidth: 1, borderColor: "#f4ba44", shadowColor: "#000000", shadowOpacity: 0.3, shadowRadius: 28, shadowOffset: { width: 0, height: 15 }, elevation: 12 },
+  submissionBrandRow: { width: "100%", flexDirection: "row", alignItems: "center", marginBottom: 22 },
+  submissionBrandMark: { width: 35, height: 35, borderRadius: 10, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#f4ba44", backgroundColor: "#531110", position: "relative" },
+  submissionBrandMarkText: { color: "#f4ba44", fontSize: 24, fontWeight: "300", lineHeight: 27 },
+  submissionBrandSlash: { position: "absolute", width: 1.5, height: 28, right: 9, backgroundColor: "#f4ba44", transform: [{ rotate: "24deg" }] },
+  submissionBrandName: { color: "#531110", fontSize: 13, fontWeight: "900", letterSpacing: 2.8, marginLeft: 10 },
+  submissionBrandDescriptor: { color: "#ae2e2a", fontSize: 7, fontWeight: "900", letterSpacing: 0.95, marginLeft: 10, marginTop: 2 },
+  submissionSecureBadge: { flexDirection: "row", alignItems: "center", gap: 4, paddingVertical: 6, paddingHorizontal: 8, borderRadius: 99, backgroundColor: "#531110", marginLeft: "auto" },
+  submissionSecureText: { color: "#f4ba44", fontSize: 8, fontWeight: "900", letterSpacing: 0.8 },
+  submissionOrb: { width: 108, height: 108, alignItems: "center", justifyContent: "center", borderRadius: 54, backgroundColor: "#531110", marginBottom: 18, shadowColor: "#ae2e2a", shadowOpacity: 0.34, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 6 },
+  submissionOrbit: { position: "absolute", width: 94, height: 94, borderRadius: 47, borderWidth: 2, borderColor: "#f4ba44", borderTopColor: "transparent", borderRightColor: "#ae2e2a" },
+  submissionOrbCore: { width: 62, height: 62, alignItems: "center", justifyContent: "center", borderRadius: 31, backgroundColor: "#ae2e2a" },
+  submissionKicker: { color: "#ae2e2a", fontSize: 10, fontWeight: "900", letterSpacing: 1.7 },
+  submissionTitle: { color: "#531110", fontSize: 27, lineHeight: 33, fontWeight: "900", marginTop: 7, textAlign: "center" },
+  submissionText: { color: "#78716c", fontSize: 13, lineHeight: 19, marginTop: 8, textAlign: "center", maxWidth: 310 },
+  submissionProgressTrack: { width: "100%", height: 6, borderRadius: 99, backgroundColor: "#eee8e2", marginTop: 21, overflow: "hidden" },
+  submissionProgressFill: { height: "100%", borderRadius: 99, backgroundColor: "#ae2e2a" },
+  submissionStepCounterRow: { width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 9 },
+  submissionStepCounter: { color: "#a8a29e", fontSize: 9, fontWeight: "900", letterSpacing: 0.8 },
+  submissionStepCurrent: { color: "#ae2e2a", fontSize: 10, fontWeight: "900", maxWidth: 170, textAlign: "right" },
+  submissionStepsList: { width: "100%", marginTop: 9 },
+  submissionProgressRow: { width: "100%", flexDirection: "row", alignItems: "center", gap: 10, marginTop: 8 },
+  submissionProgressDot: { width: 24, height: 24, alignItems: "center", justifyContent: "center", borderRadius: 12, backgroundColor: "#eee8e2" },
+  submissionProgressDotDone: { backgroundColor: "#16a34a" },
+  submissionProgressDotCurrent: { backgroundColor: "#ae2e2a" },
+  submissionProgressText: { flex: 1, color: "#531110", fontSize: 12, fontWeight: "800" },
+  submissionProgressTextMuted: { color: "#a8a29e" },
+  submissionFooter: { color: "#a8a29e", fontSize: 10, fontWeight: "700", textAlign: "center", marginTop: 17 },
   completeContent: { flexGrow: 1, alignItems: "center", justifyContent: "center", padding: 22 },
   completeIcon: { width: 92, height: 92, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.primary, marginBottom: 22, shadowColor: colors.primary, shadowOpacity: 0.3, shadowRadius: 15, shadowOffset: { width: 0, height: 8 }, elevation: 4 },
   completeKicker: { color: colors.primary, fontSize: 10, fontWeight: "900", letterSpacing: 1.5, textAlign: "center" },
