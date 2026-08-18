@@ -28,7 +28,8 @@ export type InsertUser = typeof users.$inferInsert;
 // TODO: Add your tables here
 
 export const breakAudits = mysqlTable("break_audits", {
-  id: varchar("id", { length: 36 }).primaryKey(),
+  id: int("id").primaryKey().autoincrement(),
+  auditUuid: varchar("auditUuid", { length: 36 }),
   serviceAppointmentId: varchar("serviceAppointmentId", { length: 64 }).notNull(),
   technicianCsso: varchar("technicianCsso", { length: 64 }).notNull(),
   reason: varchar("reason", { length: 255 }).notNull(),

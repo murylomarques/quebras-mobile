@@ -56,3 +56,6 @@
 - [x] Ajustar tabela break_audits para alinhar colunas de metadados de imagem e ID UUIDv7
 - [x] Tornar o endpoint submit idempotente (retornar sucesso se a SA já estiver auditada)
 - [x] Criar tela de envio bloqueante com animação e indicador "Enviando dados... só um minuto"
+
+- [x] Diagnosticar coluna divergente em break_audits que causa erro 500
+- [x] Recriar ou alinhar a tabela break_audits e garantir tratamento idempotente seguro

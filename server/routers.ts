@@ -89,7 +89,7 @@ export const appRouter = router({
         const auditId = generateUuidV7();
 
         const auditIdResult = await db.createBreakAudit({
-          id: auditId,
+          auditUuid: auditId,
           serviceAppointmentId: input.serviceAppointmentId,
           technicianCsso: input.technicianCsso,
           reason: input.reason,
