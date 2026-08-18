@@ -33,8 +33,15 @@
 
 - [x] Diagnosticar e corrigir o erro de inicialização do app no Expo após a implementação da orientação por voz
 - [x] Validar novamente o carregamento do app e o fluxo da câmera no Expo Go
-- [ ] Salvar checkpoint da correção do erro do Expo
+- [x] Salvar checkpoint da correção do erro do Expo
 ``` 
 
 - [x] Refinar a câmera assistida para eliminar falas repetitivas aleatórias, introduzir instruções contextuais inteligentes e corrigir o layout comprimido
 - [ ] Confirmar o comportamento da captura inteligente em aparelho físico com diferentes condições de iluminação
+
+- [x] Criar tabela break_audits e aplicar migration no banco
+- [x] Criar endpoint backend para salvar CSSO, SA, motivo, URL/chave da evidência, latitude, longitude, horário e status
+- [x] Integrar o app ao backend com upload da evidência, conclusão da SA, protocolo de auditoria e prevenção de duplicidade
+- [x] Corrigir a configuração do Metro/NativeWind e validar bundles web e Android
+- [ ] Confirmar o envio real de uma foto e GPS em aparelho físico conectado ao backend
+- [x] Salvar checkpoint da integração de auditoria

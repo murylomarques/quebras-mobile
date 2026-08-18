@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { breakAudits, InsertBreakAudit, InsertUser, users } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -90,3 +90,28 @@ export async function getUserByOpenId(openId: string) {
 }
 
 // TODO: add feature queries here as your schema grows.
+
+
+export async function createBreakAudit(data: InsertBreakAudit) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(breakAudits).values(data);
+  return result[0].insertId;
+}
+
+export async function getBreakAuditsByCsso(technicianCsso: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(breakAudits).where(eq(breakAudits.technicianCsso, technicianCsso));
+}
+
+export async function getBreakAuditByServiceAppointmentId(serviceAppointmentId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select()
+    .from(breakAudits)
+    .where(eq(breakAudits.serviceAppointmentId, serviceAppointmentId))
+    .limit(1);
+  return result[0];
+}

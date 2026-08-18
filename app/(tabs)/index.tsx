@@ -1,5 +1,7 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import * as FileSystem from "expo-file-system/legacy";
 import * as Haptics from "expo-haptics";
+import * as Location from "expo-location";
 import * as Speech from "expo-speech";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -28,9 +30,11 @@ import Animated, {
 
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
+import { trpc } from "@/lib/trpc";
 
 type Step = "identification" | "service" | "reason" | "evidence" | "complete";
 type CameraStatus = "loading" | "ready" | "error";
+type GpsSnapshot = { latitude: number; longitude: number; accuracy: number | null; capturedAt: string };
 type Reason = { name: string; available: boolean; detail: string };
 type ServiceAppointment = { id: string; address: string; serviceType: string; schedule: string };
 
@@ -206,7 +210,11 @@ export default function HomeScreen() {
   const [guidanceIndex, setGuidanceIndex] = useState(0);
   const [guidanceText, setGuidanceText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [completedServiceIds, setCompletedServiceIds] = useState<string[]>([]);
+  const [gpsSnapshot, setGpsSnapshot] = useState<GpsSnapshot | null>(null);
+  const [auditId, setAuditId] = useState<string | null>(null);
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+  const submitBreakAudit = trpc.breaks.submit.useMutation();
   const cameraRef = useRef<CameraView>(null);
   const filteredServices = useMemo(
     () => technicianServices.filter((service) => `${service.id} ${service.address} ${service.serviceType}`.toLowerCase().includes(serviceSearch.toLowerCase().trim())),
@@ -282,9 +290,34 @@ export default function HomeScreen() {
   };
 
   const handleServiceSelection = (service: ServiceAppointment) => {
+    if (completedServiceIds.includes(service.id)) {
+      Alert.alert("SA já concluída", "Esta SA já possui uma quebra registrada e auditada.");
+      return;
+    }
     tapFeedback();
     setSelectedService(service);
     setStep("reason");
+  };
+
+  const captureGpsSnapshot = async (): Promise<GpsSnapshot | null> => {
+    if (Platform.OS === "web") return null;
+    try {
+      const servicesEnabled = await Location.hasServicesEnabledAsync();
+      if (!servicesEnabled) return null;
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (permission.status !== "granted") return null;
+      const current = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+      const snapshot: GpsSnapshot = {
+        latitude: current.coords.latitude,
+        longitude: current.coords.longitude,
+        accuracy: current.coords.accuracy ?? null,
+        capturedAt: new Date(current.timestamp).toISOString(),
+      };
+      setGpsSnapshot(snapshot);
+      return snapshot;
+    } catch {
+      return null;
+    }
   };
 
   const handleReasonSelection = (reason: Reason) => {
@@ -315,7 +348,9 @@ export default function HomeScreen() {
     setCameraStatus("loading");
     setGuidanceIndex(0);
     setGuidanceText("Preparando a câmera...");
+    setGpsSnapshot(null);
     setCameraVisible(true);
+    void captureGpsSnapshot();
   };
 
   const handleCameraReady = () => {
@@ -385,18 +420,56 @@ export default function HomeScreen() {
     setCameraVisible(true);
   };
 
-  const handleSubmit = () => {
-    if (!evidenceAdded) {
+  const handleSubmit = async () => {
+    if (!evidenceAdded || !selectedService || !selectedReason) {
       Alert.alert("Evidência necessária", "Adicione a evidência solicitada antes de registrar.");
       return;
     }
+    if (completedServiceIds.includes(selectedService.id)) {
+      Alert.alert("SA já concluída", "Esta SA já possui uma quebra registrada e auditada.");
+      return;
+    }
+
     tapFeedback();
     setIsSubmitting(true);
-    setTimeout(() => {
+    try {
+      const location = gpsSnapshot ?? (await captureGpsSnapshot());
+      if (Platform.OS !== "web" && !location) {
+        throw new Error("Não foi possível obter a localização. Ative o GPS e permita o acesso à localização para continuar.");
+      }
+
+      let evidenceBase64: string | undefined;
+      let evidenceUrl: string | undefined;
+      if (photoUri && photoUri !== "demo-photo" && Platform.OS !== "web") {
+        evidenceBase64 = await FileSystem.readAsStringAsync(photoUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+      } else {
+        evidenceUrl = "demo://evidence";
+      }
+
+      const response = await submitBreakAudit.mutateAsync({
+        serviceAppointmentId: selectedService.id,
+        technicianCsso: username.trim(),
+        reason: selectedReason,
+        evidenceUrl,
+        evidenceBase64,
+        evidenceMimeType: "image/jpeg",
+        latitude: location ? String(location.latitude) : undefined,
+        longitude: location ? String(location.longitude) : undefined,
+        capturedAt: location?.capturedAt ?? new Date().toISOString(),
+      });
+
+      setAuditId(String(response.auditId));
+      setCompletedServiceIds((current) => [...new Set([...current, selectedService.id])]);
       setIsSubmitting(false);
       setStep("complete");
       if (Platform.OS !== "web") void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }, 1100);
+    } catch (error) {
+      setIsSubmitting(false);
+      const message = error instanceof Error ? error.message : "Não foi possível registrar a quebra no backend.";
+      Alert.alert("Envio não concluído", message);
+    }
   };
 
   const handleReset = () => {
@@ -405,6 +478,8 @@ export default function HomeScreen() {
     setSelectedReason("");
     setEvidenceAdded(false);
     setPhotoUri(null);
+    setGpsSnapshot(null);
+    setAuditId(null);
     setServiceSearch("");
     setStep("service");
   };
@@ -618,19 +693,22 @@ export default function HomeScreen() {
                   <Text style={styles.emptyText}>Tente buscar por outro número ou endereço.</Text>
                 </View>
               }
-              renderItem={({ item, index }) => (
-                <Animated.View entering={FadeInDown.delay(Math.min(index, 5) * 55).duration(300)}>
-                  <Pressable onPress={() => handleServiceSelection(item)} style={({ pressed }) => [styles.serviceCard, pressed && styles.cardPressed]}>
-                    <View style={styles.serviceCardTop}>
-                      <View style={styles.serviceIcon}><MaterialIcons name="assignment" size={20} color={colors.primary} /></View>
-                      <View style={styles.serviceCardTitleWrap}><Text style={styles.serviceCardId}>{item.id}</Text><Text style={styles.serviceSchedule}>{item.schedule}</Text></View>
-                      <MaterialIcons name="arrow-forward-ios" size={16} color={colors.primary} />
-                    </View>
-                    <Text style={styles.serviceType}>{item.serviceType}</Text>
-                    <View style={styles.serviceAddressRow}><MaterialIcons name="location-on" size={16} color={colors.muted} /><Text style={styles.serviceAddress}>{item.address}</Text></View>
-                  </Pressable>
-                </Animated.View>
-              )}
+              renderItem={({ item, index }) => {
+                const isCompleted = completedServiceIds.includes(item.id);
+                return (
+                  <Animated.View entering={FadeInDown.delay(Math.min(index, 5) * 55).duration(300)}>
+                    <Pressable disabled={isCompleted} onPress={() => handleServiceSelection(item)} style={({ pressed }) => [styles.serviceCard, isCompleted && styles.serviceCardCompleted, pressed && !isCompleted && styles.cardPressed]}>
+                      <View style={styles.serviceCardTop}>
+                        <View style={[styles.serviceIcon, isCompleted && styles.serviceIconCompleted]}><MaterialIcons name={isCompleted ? "check" : "assignment"} size={20} color={isCompleted ? colors.success : colors.primary} /></View>
+                        <View style={styles.serviceCardTitleWrap}><Text style={styles.serviceCardId}>{item.id}</Text><Text style={styles.serviceSchedule}>{item.schedule}</Text></View>
+                        {isCompleted ? <View style={styles.completedBadge}><MaterialIcons name="verified" size={13} color={colors.success} /><Text style={styles.completedBadgeText}>Concluída</Text></View> : <MaterialIcons name="arrow-forward-ios" size={16} color={colors.primary} />}
+                      </View>
+                      <Text style={styles.serviceType}>{item.serviceType}</Text>
+                      <View style={styles.serviceAddressRow}><MaterialIcons name="location-on" size={16} color={colors.muted} /><Text style={styles.serviceAddress}>{item.address}</Text></View>
+                    </Pressable>
+                  </Animated.View>
+                );
+              }}
             />
           )}
 
@@ -717,7 +795,7 @@ export default function HomeScreen() {
                   disabled={!evidenceAdded || isSubmitting}
                   style={({ pressed }) => [styles.primaryButton, (!evidenceAdded || isSubmitting) && styles.disabledButton, pressed && evidenceAdded && !isSubmitting && styles.buttonPressed]}
                 >
-                  {isSubmitting ? <ActivityIndicator color={colors.background} /> : <><Text style={styles.primaryButtonText}>Registrar solicitação</Text><MaterialIcons name="check-circle-outline" size={20} color={colors.background} /></>}
+                  {isSubmitting ? <ActivityIndicator color={colors.background} /> : <><Text style={styles.primaryButtonText}>Enviar e concluir SA</Text><MaterialIcons name="check-circle-outline" size={20} color={colors.background} /></>}
                 </Pressable>
               </View>
             </ScrollView>
@@ -727,12 +805,15 @@ export default function HomeScreen() {
             <ScrollView contentContainerStyle={styles.completeContent}>
               <Animated.View entering={FadeInDown.duration(420)} style={styles.completeIcon}><MaterialIcons name="check" size={48} color={colors.background} /></Animated.View>
               <Text style={styles.completeKicker}>DESKTOP • REGISTRO CONCLUÍDO</Text>
-              <Text style={styles.completeTitle}>Solicitação registrada.</Text>
-              <Text style={styles.completeSubtitle}>A quebra da SA {selectedService?.id} foi organizada em modo demonstrativo.</Text>
+              <Text style={styles.completeTitle}>SA concluída e auditada.</Text>
+              <Text style={styles.completeSubtitle}>A quebra da SA {selectedService?.id} foi concluída e enviada para auditoria.</Text>
               <View style={styles.summaryCard}>
-                <View style={styles.summaryRow}><MaterialIcons name="assignment-turned-in" size={20} color={colors.primary} /><Text style={styles.summaryText}>Evidência vinculada à solicitação</Text></View>
+                <View style={styles.summaryRow}><MaterialIcons name="assignment-turned-in" size={20} color={colors.success} /><Text style={styles.summaryText}>SA marcada como concluída</Text></View>
                 <View style={styles.summaryDivider} />
-                <View style={styles.summaryRow}><MaterialIcons name="schedule" size={20} color={colors.primary} /><Text style={styles.summaryText}>Validações prontas para parametrização</Text></View>
+                <View style={styles.summaryRow}><MaterialIcons name="cloud-done" size={20} color={colors.success} /><Text style={styles.summaryText}>Dados e evidência salvos no backend</Text></View>
+                <View style={styles.summaryDivider} />
+                <View style={styles.summaryRow}><MaterialIcons name="location-on" size={20} color={colors.success} /><Text style={styles.summaryText}>{gpsSnapshot ? `GPS registrado: ${gpsSnapshot.latitude.toFixed(5)}, ${gpsSnapshot.longitude.toFixed(5)}` : "Registro de localização processado"}</Text></View>
+                {auditId ? <><View style={styles.summaryDivider} /><View style={styles.summaryRow}><MaterialIcons name="fingerprint" size={20} color={colors.primary} /><Text style={styles.summaryText}>Protocolo de auditoria: {auditId}</Text></View></> : null}
               </View>
               <Pressable onPress={handleReset} style={({ pressed }) => [styles.primaryButton, styles.fullButton, pressed && styles.buttonPressed]}>
                 <Text style={styles.primaryButtonText}>Registrar nova quebra</Text>
@@ -798,8 +879,12 @@ const makeStyles = (colors: any) => StyleSheet.create({
   serviceCountRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 13 },
   serviceCount: { color: colors.muted, fontSize: 11, fontWeight: "800", letterSpacing: 0.2 },
   serviceCard: { padding: 15, borderRadius: 18, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+  serviceCardCompleted: { borderColor: colors.success + "66", backgroundColor: colors.success + "0b" },
   serviceCardTop: { flexDirection: "row", alignItems: "center" },
   serviceIcon: { width: 41, height: 41, borderRadius: 13, alignItems: "center", justifyContent: "center", backgroundColor: colors.primary + "16" },
+  serviceIconCompleted: { backgroundColor: colors.success + "18" },
+  completedBadge: { minHeight: 28, flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, borderRadius: 99, backgroundColor: colors.success + "18" },
+  completedBadgeText: { color: colors.success, fontSize: 10, fontWeight: "900" },
   serviceCardTitleWrap: { flex: 1, marginLeft: 11 },
   serviceCardId: { color: colors.foreground, fontSize: 15, fontWeight: "900", letterSpacing: 0.3 },
   serviceSchedule: { color: colors.primary, fontSize: 11, fontWeight: "800", marginTop: 4 },

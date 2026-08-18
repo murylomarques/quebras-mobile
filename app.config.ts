@@ -87,6 +87,12 @@ const config: ExpoConfig = {
   plugins: [
     "expo-router",
     [
+      "expo-location",
+      {
+        locationWhenInUsePermission: "Permita que a DESKTOP Quebras confirme a localização da SA durante o registro.",
+      },
+    ],
+    [
       "expo-camera",
       {
         cameraPermission: "Permitir que o DESKTOP acesse a câmera para registrar evidências.",

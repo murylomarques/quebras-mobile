@@ -26,3 +26,20 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
 // TODO: Add your tables here
+
+export const breakAudits = mysqlTable("break_audits", {
+  id: int("id").autoincrement().primaryKey(),
+  serviceAppointmentId: varchar("serviceAppointmentId", { length: 64 }).notNull(),
+  technicianCsso: varchar("technicianCsso", { length: 64 }).notNull(),
+  reason: varchar("reason", { length: 255 }).notNull(),
+  evidenceUrl: text("evidenceUrl").notNull(),
+  evidenceKey: text("evidenceKey"),
+  latitude: varchar("latitude", { length: 64 }),
+  longitude: varchar("longitude", { length: 64 }),
+  capturedAt: varchar("capturedAt", { length: 64 }),
+  status: varchar("status", { length: 32 }).default("completed").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type BreakAudit = typeof breakAudits.$inferSelect;
+export type InsertBreakAudit = typeof breakAudits.$inferInsert;
