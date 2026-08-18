@@ -59,3 +59,5 @@
 
 - [x] Diagnosticar coluna divergente em break_audits que causa erro 500
 - [x] Recriar ou alinhar a tabela break_audits e garantir tratamento idempotente seguro
+
+- [x] Adicionar três SAs mockadas para testes do fluxo completo

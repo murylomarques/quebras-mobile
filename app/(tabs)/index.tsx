@@ -64,6 +64,9 @@ const technicianServices: ServiceAppointment[] = [
   { id: "SA-983587", address: "Av. Brasil, 820 • Bela Vista", serviceType: "Reparo de conexão", schedule: "Hoje • 13:00" },
   { id: "SA-984021", address: "Rua Harmonia, 64 • Pinheiros", serviceType: "Mudança de endereço", schedule: "Amanhã • 08:00" },
   { id: "SA-984118", address: "Al. Santos, 1010 • Jardins", serviceType: "Instalação de fibra", schedule: "Amanhã • 14:30" },
+  { id: "SA-984233", address: "Rua Vergueiro, 2250 • Aclimação", serviceType: "Reparo de conexão", schedule: "Amanhã • 16:00" },
+  { id: "SA-984407", address: "Rua Oscar Freire, 780 • Cerqueira César", serviceType: "Instalação de fibra", schedule: "Quinta-feira • 09:00" },
+  { id: "SA-984512", address: "Rua Moema, 318 • Moema", serviceType: "Mudança de endereço", schedule: "Quinta-feira • 11:30" },
 ];
 
 type EvidenceGuide = {
