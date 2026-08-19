@@ -65,3 +65,7 @@
 - [x] Redesenhar a tela bloqueante de envio com visual DESKTOP moderno, etapas de progresso e estado de sucesso
 - [x] Validar a nova animação de envio em TypeScript, lint e preview web
 - [x] Salvar checkpoint da melhoria visual da tela de envio
+
+- [x] Limpar auditorias concluídas do ambiente de demonstração e reiniciar a disponibilidade das SAs
+- [x] Validar que a consulta por CSSO retorna zero auditorias e que as 7 SAs ficam disponíveis
+- [ ] Salvar checkpoint do ambiente de demonstração resetado
