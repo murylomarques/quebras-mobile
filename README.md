@@ -92,6 +92,10 @@ graph TD
 
 ---
 
+## Explorador de Consultas Salesforce
+
+O diretório [`salesforce_soql/`](./salesforce_soql/) contém um utilitário Python independente para montar e executar consultas SOQL somente de leitura. Ele usa as credenciais OAuth da External Client App, consulta os metadados de objetos e campos e bloqueia comandos de alteração antes da execução. Consulte o [guia do Salesforce SOQL Explorer](./salesforce_soql/README.md) para instalar e configurar.
+
 ## Relatório de Conclusão e Entrega
 
 A solução encontra-se **100% pronta para operação**, tendo sido validada nos testes de compilação TypeScript, lint e estabilidade de pacotes. A apresentação executiva destinada à diretoria encontra-se estruturada e disponível no projeto, acompanhada da capa institucional e dos slides de validação operacional.
